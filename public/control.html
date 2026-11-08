@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test Panel</title>
+<style>
+  body { font-family: system-ui, sans-serif; background: #15151c; color: #eee; margin: 0; padding: 16px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  #status { font-size: 13px; opacity: .7; margin-bottom: 14px; }
+  .row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: center; }
+  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: .06em; opacity: .6; margin: 18px 0 8px; }
+  button { background: #2a2a38; color: #fff; border: 1px solid #3a3a4c; border-radius: 10px; padding: 10px 14px; font-size: 15px; cursor: pointer; }
+  button:hover { background: #363648; }
+  button.danger { border-color: #7a2a3a; }
+  input { background: #0e0e14; color: #fff; border: 1px solid #3a3a4c; border-radius: 8px; padding: 8px 10px; font-size: 15px; }
+  input[type=number] { width: 70px; }
+</style>
+</head>
+<body>
+<h1>Test Panel</h1>
+<div id="status">connecting...</div>
+
+<div class="row">
+  <label>Viewer name <input id="name" value="maria_23"></label>
+  <label>Combo × <input id="count" type="number" value="1" min="1"></label>
+  <button id="rand">Random name</button>
+</div>
+
+<h2>Gifts</h2>
+<div class="row" id="gifts"></div>
+
+<h2>Free engagement</h2>
+<div class="row">
+  <button data-like="25">❤️ 25 likes</button>
+  <button data-like="200">❤️ 200 likes</button>
+  <button data-chat="1">💬 "1"</button><button data-chat="2">💬 "2"</button>
+  <button data-chat="3">💬 "3"</button><button data-chat="4">💬 "4"</button>
+  <button id="follow">➕ Follow</button>
+  <button id="share">🔁 Share</button>
+  <button id="join">👋 Join</button>
+</div>
+
+<h2>Stream</h2>
+<div class="row">
+  <button id="storm">🌪️ Gift storm (10 random gifts)</button>
+  <button id="reset" class="danger">Reset goal, likes, top fan</button>
+</div>
+
+<script>
+const names = ['maria_23', 'juan.dc', 'ken_gaming', 'lovely.anne', 'dogmom88', 'rj_vlogs', 'xiaolin', 'noah.ph'];
+const $ = (id) => document.getElementById(id);
+const user = () => ({ name: $('name').value, id: $('name').value, pic: '' });
+const send = (ev) => fetch('/sim', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(ev) });
+
+// Coin values roughly match TikTok's gift prices; only used for the goal and top fan.
+const coins = { 'Rose': 1, 'Finger Heart': 5, 'Perfume': 20, 'Hand Hearts': 100, 'Doughnut': 30, 'Galaxy': 1000 };
+const cfgName = new URLSearchParams(location.search).get('cfg') || 'config';
+
+fetch('/config?name=' + cfgName).then((r) => r.json()).then((cfg) => {
+  cfg.gifts.forEach((g) => { if (g.coins) coins[g.gift] = g.coins; });
+  const chats = Object.keys(cfg.chatCommands || {});
+  document.querySelectorAll('[data-chat]').forEach((b, i) => {
+    if (chats[i] == null) { b.remove(); return; }
+    b.dataset.chat = chats[i]; b.textContent = `💬 "${chats[i]}"`;
+  });
+  [...cfg.gifts, { gift: 'Some Unmapped Gift', icon: '🎁' }].forEach((g) => {
+    const b = document.createElement('button');
+    b.textContent = `${g.icon} ${g.gift}`;
+    b.onclick = () => send({ type: 'gift', user: user(), gift: g.gift, count: +$('count').value || 1, coins: coins[g.gift] || 10 });
+    $('gifts').appendChild(b);
+  });
+  $('storm').onclick = () => {
+    for (let i = 0; i < 10; i++) {
+      const g = cfg.gifts[Math.floor(Math.random() * (cfg.gifts.length - 1))];
+      const n = names[Math.floor(Math.random() * names.length)];
+      setTimeout(() => send({ type: 'gift', user: { name: n, id: n, pic: '' }, gift: g.gift, count: 1 + Math.floor(Math.random() * 5), coins: coins[g.gift] || 10 }), i * 150);
+    }
+  };
+});
+
+$('rand').onclick = () => { $('name').value = names[Math.floor(Math.random() * names.length)]; };
+document.querySelectorAll('[data-like]').forEach((b) => b.onclick = () => send({ type: 'like', user: user(), count: +b.dataset.like }));
+document.querySelectorAll('[data-chat]').forEach((b) => b.onclick = () => send({ type: 'chat', user: user(), text: b.dataset.chat }));
+$('follow').onclick = () => send({ type: 'follow', user: user() });
+$('join').onclick = () => send({ type: 'join', user: user() });
+$('share').onclick = () => send({ type: 'share', user: user() });
+$('reset').onclick = () => confirm('Reset goal progress, like meter and top fan?') && send({ type: 'reset' });
+
+(function connect() {
+  const ws = new WebSocket(`ws://${location.host}`);
+  ws.onmessage = (m) => { const e = JSON.parse(m.data); if (e.type === 'status') $('status').textContent = 'Server: ' + e.text; };
+  ws.onclose = () => { $('status').textContent = 'Server not running. Start it with: npm start'; setTimeout(connect, 2000); };
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+{
+  "title": "Space Pups",
+  "idleVideo": "clips/idle.mp4",
+  "characters": [
+    { "name": "Pinky", "emoji": "🐩" },
+    { "name": "Bolt", "emoji": "🐕" },
+    { "name": "Luna", "emoji": "🐺" },
+    { "name": "Bruno", "emoji": "🦮" }
+  ],
+  "gifts": [
+    { "gift": "Rose", "icon": "🌹", "label": "Pinky dances", "character": 0, "anim": "dance",
+      "clips": ["clips/pinky_dance.mp4", "clips/pinky_dance2.mp4"] },
+    { "gift": "Finger Heart", "icon": "🫰", "label": "Bolt dances", "character": 1, "anim": "dance",
+      "clips": ["clips/bolt_dance.mp4"] },
+    { "gift": "Perfume", "icon": "🧴", "label": "Luna spins", "character": 2, "anim": "spin",
+      "clips": ["clips/luna_spin.mp4"] },
+    { "gift": "Hand Hearts", "icon": "🤲", "label": "Bruno jumps", "character": 3, "anim": "jump",
+      "clips": ["clips/bruno_jump.mp4"] },
+    { "gift": "Doughnut", "icon": "🍩", "label": "GROUP DANCE", "character": "all", "anim": "dance",
+      "clips": ["clips/group_dance.mp4"] },
+    { "gift": "Galaxy", "icon": "🌌", "label": "ROCKET LAUNCH", "character": "all", "anim": "rocket", "epic": true,
+      "clips": ["clips/rocket.mp4"] }
+  ],
+  "defaultGift": { "label": "everyone waves", "character": "all", "anim": "jump", "clips": [] },
+  "goal": { "label": "Pups fly to Mars 🚀", "target": 500 },
+  "likeMeter": { "label": "Likes = everyone howls", "target": 500, "character": "all", "anim": "jump",
+    "clips": ["clips/howl.mp4"] },
+  "chatCommands": { "1": 0, "2": 1, "3": 2, "4": 3 },
+  "chatHint": "Type 1-4 to make a pup bark!"
+}

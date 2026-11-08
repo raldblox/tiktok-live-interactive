@@ -1,0 +1,76 @@
+{
+  "model": "gpt_image_2",
+  "ratio": "1440:2560",
+  "quality": "high",
+  "images": {
+    "identity": {
+      "prompt": "Professional studio photograph of Zuri, the same young Savannah F1 cat shown in @slim and @full: same face, black tear-line markings, amber-gold eyes, golden coat with bold black spots, ringed black-tipped tail and thin cognac leather collar with a tiny round gold tag. Her body is exactly halfway between @slim and @full: athletic and healthy, well fed but lean, a graceful medium-length neck, a defined chest, long elegant legs with some muscle, large ears in proportion to her head, never skinny and never chubby. She sits upright facing the camera, full body visible from ear tips to front paws, tail curled around her feet, calm confident expression. Plain warm-gray seamless studio backdrop, soft even studio lighting, photorealistic, sharp focus with ultra detailed individual fur strands, whiskers and eye texture, nothing else in the frame, no text, no watermark.",
+      "refs": [
+        {
+          "file": "season2/identity-v1-skinny.png",
+          "tag": "slim"
+        },
+        {
+          "file": "season2/identity-v2-chubby.png",
+          "tag": "full"
+        }
+      ]
+    },
+    "room": {
+      "prompt": "Vertical photograph of an empty luxury cat suite at night, custom-built for one pampered Savannah cat, photorealistic interior photography, shot from a static camera low at a cat's eye level, looking into the corner where the left wall meets the right wall. No animals and no people anywhere. CENTER FOREGROUND: a low custom walnut cat throne bed sized for one cat, with a cream boucle cushion and the name \"ZURI\" in small polished brass letters on its front edge, standing on a round cream wool-and-silk rug; the rug and the bed are clear and empty. RIGHT WALL: a large black-framed window showing night city lights, with light drizzle falling far outside as soft blurred streaks against the city lights; the window pane is perfectly clean and dry. Under the window, a built-in walnut window perch with a cushioned cream lounger and a two-step walnut ramp up from the floor, and a small stone planter of fresh cat grass at its far end. THE CORNER: a built-in walnut climbing wall rising in staggered floating steps up the corner, a sisal-wrapped pillar, a curved natural-canvas hammock, and at the top a round walnut lookout pod with a porthole opening. LEFT WALL: a low walnut cabinet with a wide frameless mirror at cat eye height reflecting part of the room; on the cabinet stands a rose-pink Apple HomeView smart display exactly like the real product in @homeview: a large rounded-square touchscreen with a thick rounded bezel in soft pink-white aluminum, mounted on the front of a rounded dome-shaped base so the screen sits up high and tilts back slightly, the smooth dome visible behind and below the screen, and a perforated speaker mesh band wrapped around the bottom of the dome. Its screen shows a calm golden savanna sunset with a small clock. Above the cabinet, a warm amber neon sign mounted flat on the left wall reads \"Zuri\" in script. Beside it hangs a small oil painting of a spotted Savannah cat in an ornate gold frame; in the bottom right corner of the painting, tiny and barely noticeable, is a handwritten artist signature that reads \"Reaper Pro Max\". Luxury details placed naturally: a sculptural brass floor lamp with a warm glow, a fluted travertine side table with a cut-crystal bowl, white orchids in a stone pot, a stack of art books, a cognac leather cat carrier with brass hardware resting by the cabinet, a tall olive tree and a monstera in terracotta pots. Materials: warm walnut, brass, cream boucle, linen, travertine, rattan. Lighting: warm lamp light, the amber neon glow and cool city light through the window, cozy and expensive. Composition: the top third of the frame is calm plain wall and the upper window frame; every zone is fully inside the frame with clear floor between them. Nothing hot, no steam, no candles, no loose toys on the floor. No logos and no brand names visible, no text except the neon \"Zuri\", the brass \"ZURI\" letters and the tiny painting signature. Ultra detailed, sharp, natural photographic realism."
+    },
+    "room-fix": {
+      "prompt": "Recreate the photograph @room exactly: the same camera angle, framing, room layout, furniture, objects, materials, lighting and colors, as close as possible everywhere. Change ONLY the small smart display standing on the walnut cabinet on the left (in front of the mirror): replace it with a rose-pink Apple HomeView smart display exactly like the real product in @homeview: a large rounded-square touchscreen with a thick rounded bezel in soft pink-white aluminum, mounted on the front of a rounded dome-shaped base so the screen sits up high and tilts back slightly, the smooth dome visible behind and below the screen, and a perforated speaker mesh band wrapped around the bottom of the dome. Its screen shows a calm golden savanna sunset with a small clock. It stands on the cabinet in the same spot, about the size of a small tabletop speaker with its screen roughly 7 inches wide, facing the room. Everything else in the image stays exactly the same. Photorealistic, no added text, no logos.",
+      "refs": [
+        {
+          "file": "season2/room-v3-arm-homeview.png",
+          "tag": "room"
+        },
+        {
+          "file": "season2/refs/homeview-front.png",
+          "tag": "homeview"
+        }
+      ],
+      "out": "room"
+    },
+    "anchor": {
+      "prompt": "Recreate the photograph @scene exactly: the same camera angle, framing, room layout, furniture, objects, materials, lighting, colors and the same cat in the same place, pose and size in the center of the ZURI throne bed. Fix only the architecture of the room corner so it is physically correct, like a real room photographed with a real lens: the left wall and the right wall meet in ONE straight vertical corner line that runs continuously from the floor up to the ceiling, clearly visible above and below the climbing wall. At the top, the left wall-to-ceiling edge and the right wall-to-ceiling edge are two straight lines that meet that vertical corner line at one single shared point, forming a clean three-way corner with consistent perspective. Move the round walnut lookout pod slightly lower and mount it on the corner below the ceiling, so it no longer hides the point where the ceiling edges and the corner line meet; that junction is clearly visible above the pod. The window wall on the right continues smoothly from the corner, with no extra steps, recesses or misaligned planes. Keep the climbing steps, sisal pillar and hammock the same. Zuri stays exactly as in @scene and is the same cat as @zuri: same face, large ears, black tear-line markings, amber-gold eyes, golden coat with bold black spots, ringed tail, thin cognac collar with a tiny gold tag. Heavy rain keeps falling outside the window as in @scene. Everything else stays exactly as in @scene. Photorealistic, ultra detailed, no added text.",
+      "refs": [
+        {
+          "file": "season2/anchor-v3-raw-badcorner.png",
+          "tag": "scene"
+        },
+        {
+          "file": "season2/identity.png",
+          "tag": "zuri"
+        }
+      ]
+    },
+    "sleep-key": {
+      "prompt": "Recreate the photograph @scene exactly: the same camera angle, framing, room, furniture, objects, lighting, colors and the heavy rain outside the window. The cat is the exact same cat as @zuri and as in @scene: same face, large ears, black tear lines, golden coat with the same bold black spots, ringed black-tipped tail, thin cognac collar with a tiny gold tag, same size. Change only her pose: Zuri is fast asleep, curled up in a round ball in the exact center of the cream cushion of the ZURI throne bed, her chin resting on her front paws, eyes peacefully closed, her ringed tail wrapped around her body with the black tip near her nose, large ears relaxed. Cozy and calm. Everything else stays exactly as in @scene. Photorealistic, ultra detailed fur, no added text.",
+      "refs": [
+        {
+          "file": "season2/anchor.png",
+          "tag": "scene"
+        },
+        {
+          "file": "season2/identity.png",
+          "tag": "zuri"
+        }
+      ]
+    },
+    "play-key": {
+      "prompt": "Recreate the photograph @scene exactly: the same camera angle, framing, room, furniture, objects, lighting, colors and the heavy rain outside the window. The cat is the exact same cat as @zuri and as in @scene: same face, large ears, black tear lines, golden coat with the same bold black spots, ringed black-tipped tail, thin cognac collar with a tiny gold tag, same size. Change only her pose and place: Zuri is on the round rug just in front of the throne bed, in a low playful hunting crouch facing left, front paws together, rear slightly raised, tail swishing, ears forward, pupils wide, eyes locked on a small shimmering patch of rain-rippled light from the window that dances on the rug in front of her. The throne bed is empty behind her. Everything else stays exactly as in @scene. Photorealistic, ultra detailed fur, no added text.",
+      "refs": [
+        {
+          "file": "season2/anchor.png",
+          "tag": "scene"
+        },
+        {
+          "file": "season2/identity.png",
+          "tag": "zuri"
+        }
+      ]
+    }
+  }
+}

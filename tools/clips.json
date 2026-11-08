@@ -1,0 +1,62 @@
+{
+  "model": "seedance2_5",
+  "anchor": "character/latte-anchor.jpg",
+  "ratios": {
+    "480p": "480:854",
+    "720p": "720:1280",
+    "1080p": "1080:1920"
+  },
+  "creditsPerSecond": {
+    "480p": 20,
+    "720p": 30,
+    "1080p": 68
+  },
+  "minCredits": 80,
+  "style": "Real footage filmed on a static camera, natural real-cat motion, photorealistic, consistent warm evening lighting, the same kitten and the same room throughout. Static locked-off camera, no zoom, no pan, no cuts.",
+  "clips": {
+    "loop": {
+      "seconds": 5,
+      "prompt": "The fluffy cream kitten sits calmly on the bed breathing softly, blinks slowly twice, one ear twitches toward a sound off-screen, the tip of her tail curls lazily. A thin wisp of steam rises from the pink mug, city lights twinkle in the distance, the pink neon sign glows with a faint flicker. Physically accurate rain: outside the window, thin rain falls straight down through the night air, seen as fine streaks against the blurred city lights. The window glass is clean and dry on the room side; there is no water running down the inside of the glass and no water anywhere inside the room. Nothing else moves. She ends in exactly the same pose she started in."
+    },
+    "feather": {
+      "seconds": 5,
+      "prompt": "A small pink feather toy on a string dangles down into the frame from above, held by an off-screen hand. The fluffy cream kitten's eyes lock onto it, her ears perk forward, she wiggles her rear and swats at it with one paw, almost catching it. The feather toy is pulled back up and out of the top of the frame. She gives a little huff and settles back into exactly the same sitting pose she started in. The feather wand lying on the bed never moves."
+    },
+    "chat": {
+      "seconds": 6,
+      "prompt": "The fluffy cream kitten notices something on the camera like she is reading messages. She leans slightly toward the camera with wide curious eyes, her pupils move side to side as if reading, she slowly tilts her head to one side, then to the other side, her ears perk forward with interest, a tiny curious mouth movement as if softly mewing. Then she leans back and settles into exactly the same sitting pose she started in. The mug on the desk has no steam at all; the air in the room is clear, with no mist or smoke."
+    },
+    "pawwash": {
+      "seconds": 7,
+      "prompt": "The fluffy cream kitten lifts her right front paw, licks it with small realistic tongue strokes, then wipes the damp paw over her ear and down her cheek twice in a natural cat grooming motion, gives a tiny head shake, then places the paw back down and sits in exactly the same pose she started in, looking at the camera. The mug on the desk has no steam at all; the air in the room is clear, with no mist or smoke."
+    },
+    "window": {
+      "seconds": 8,
+      "prompt": "The fluffy cream kitten turns around on the bed to face the window, showing her fluffy back and tail to the camera. She sits watching the light drizzle outside, completely enchanted: her ears swivel toward the soft sound of the rain, her head slowly tilts as she watches it fall, and her fluffy tail sways and wiggles slowly with happiness. Then she turns back around to face the camera and settles into exactly the same sitting pose she started in. She stays on the bed the whole time. The window pane is perfectly clean, clear and dry, like the window in the starting frame. Far beyond it, a light drizzle falls straight down in the night air, visible only as soft, fine, blurred streaks against the distant city lights, like rain filmed through a clean window. The mug on the desk has no steam at all."
+    },
+    "yawn": {
+      "seconds": 5,
+      "prompt": "The fluffy cream kitten opens her mouth into a huge, slow, realistic cat yawn, showing tiny teeth and a curled pink tongue, her eyes squeeze shut and her whiskers spread, then she closes her mouth, blinks sleepily, gives a little shake of her head and settles into exactly the same sitting pose she started in, looking at the camera. The mug on the desk has no steam at all; the air in the room is clear, with no mist or smoke."
+    },
+    "rose": {
+      "seconds": 6,
+      "prompt": "An off-screen human hand gently lays a single fresh red rose on the bed right in front of the fluffy cream kitten. She leans down and sniffs the rose delicately, her whiskers twitch, she does a tiny adorable sneeze with a little head shake, then looks up at the camera with a pleased, flattered expression. The hand picks the rose back up and lifts it out of frame. She settles into exactly the same sitting pose she started in. The mug on the desk has no steam. The window pane is clean and dry."
+    },
+    "gg": {
+      "seconds": 6,
+      "prompt": "The laptop screen on the desk behind the fluffy cream kitten lights up with the big glowing letters \"GG\" and bursts of colorful confetti on the screen. She turns her head to look at the screen, her ears perk up, then she turns back to the camera, sits up tall on her hind legs and lifts both front paws in a proud little victory pose for a moment, then drops back down. The laptop screen returns to its normal soft pink wallpaper and she settles into exactly the same sitting pose she started in. The mug on the desk has no steam. The window pane is clean and dry."
+    },
+    "overreact": {
+      "seconds": 7,
+      "prompt": "The fluffy cream kitten suddenly overreacts like a soap-opera diva: her eyes go wide, her mouth drops open in shock, she leans back, then she dramatically flops over onto her side on the fluffy bed as if fainting, lying still with one paw over her face for a moment. Then she peeks out with one eye, realizes she is being watched, gets back up and settles into exactly the same sitting pose she started in, looking at the camera with a tiny bit of attitude. The mug on the desk has no steam. The window pane is clean and dry."
+    },
+    "moneygun": {
+      "seconds": 8,
+      "prompt": "A plain, unbranded matte-black money gun held just off-screen on the left sprays loose paper bills across the room, like a real money gun at a party. Each bill comes out separately and flies on its own path: they scatter, flutter, spin and tumble independently through the warm light in a loose, airy spray, spreading out in an arc above the fluffy cream kitten's head. Every bill keeps flying and drifts out of the frame on the right side or the top while still in the air; not one bill touches the bed, the floor or the cat. She ducks slightly with wide surprised eyes, then looks up and swats playfully at a fluttering bill as it passes. The spray stops, the last bills float out of frame, the air is clear again, and she lifts her chin like a proud little boss and settles into exactly the same sitting pose she started in, looking at the camera. The mug on the desk has no steam. The window pane is clean and dry."
+    },
+    "galaxy": {
+      "seconds": 8,
+      "prompt": "The room lights dim and a magical galaxy of tiny stars and soft purple and blue nebula light spreads across the walls and ceiling, like the room is filled with the universe. The fluffy cream kitten looks up and around in wonder, her eyes reflecting the starlight, she follows a shooting star with her head and gently reaches a paw up toward it. Then the stars slowly fade away, the warm room lights return exactly as before, and she settles into exactly the same sitting pose she started in, looking at the camera, amazed. The mug on the desk has no steam. The window pane is clean and dry."
+    }
+  }
+}

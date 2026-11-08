@@ -1,0 +1,277 @@
+{
+  "name": "Zuri",
+  "clipUrl": "/zuri/clips/{name}.mp4",
+  "poster": "/zuri/anchor.jpg",
+  "idle": null,
+  "moments": {
+    "chat": {
+      "weight": 3,
+      "repeat": true
+    },
+    "pawwash": {
+      "weight": 3,
+      "repeat": true
+    },
+    "blink": {
+      "weight": 3,
+      "repeat": true
+    },
+    "cloak": {
+      "weight": 1,
+      "repeat": false
+    },
+    "tailspirits": {
+      "weight": 0.5,
+      "repeat": false
+    }
+  },
+  "fallbackClip": "blink",
+  "gifts": [
+    {
+      "gift": "Rose",
+      "icon": "🌹",
+      "clip": "rose",
+      "action": "she smells your rose",
+      "line": "offered Zuri a rose",
+      "value": 1
+    },
+    {
+      "gift": "Ice Cream Cone",
+      "icon": "🍦",
+      "clip": "icecream",
+      "action": "brain freeze!",
+      "line": "gave Zuri a brain freeze",
+      "value": 1
+    },
+    {
+      "gift": "Pumpkin",
+      "icon": "🎃",
+      "clip": "pumpkin",
+      "action": "a haunted pumpkin appears",
+      "line": "sent Zuri a haunted pumpkin",
+      "value": 1
+    },
+    {
+      "gift": "Lightning Bolt",
+      "icon": "⚡",
+      "clip": "lightning",
+      "action": "the storm strikes",
+      "line": "struck the storm outside",
+      "value": 1
+    },
+    {
+      "gift": "Overreact",
+      "icon": "😱",
+      "clip": "overreact",
+      "action": "pure drama",
+      "line": "made Zuri overreact",
+      "value": 5
+    },
+    {
+      "gift": "Perfume",
+      "icon": "🪞",
+      "clip": "mirror",
+      "action": "her mirror moment",
+      "line": "sent Zuri to her mirror",
+      "value": 20
+    },
+    {
+      "gift": "Witchy Kitty",
+      "icon": "🧹",
+      "clip": "witchy",
+      "action": "she becomes a witch",
+      "line": "turned Zuri into a witch",
+      "value": 30
+    },
+    {
+      "gift": "Twinkling Star",
+      "icon": "🌟",
+      "clip": "galaxy-lite",
+      "action": "a quick trip to the stars",
+      "line": "sent Zuri to the stars",
+      "value": 199
+    },
+    {
+      "gift": "Money Gun",
+      "icon": "💸",
+      "clip": "moneygun",
+      "action": "boss mode",
+      "line": "made it rain on Zuri",
+      "big": true,
+      "value": 500
+    },
+    {
+      "gift": "Galaxy",
+      "icon": "🌌",
+      "clip": "galaxy",
+      "action": "her powers awaken in space",
+      "line": "sent Zuri across the galaxy",
+      "big": true,
+      "value": 1000
+    },
+    {
+      "gift": "Fox Legend",
+      "icon": "🦊",
+      "clip": "awaken",
+      "action": "she reveals her nine tails",
+      "line": "awakened Zuri's nine tails",
+      "big": true,
+      "value": 1800
+    }
+  ],
+  "defaultGift": {
+    "clip": "chat",
+    "line": "spoiled Zuri"
+  },
+  "chatCommands": {
+    "pspsps": "look",
+    "psps": "look",
+    "zuri": "look",
+    "hi zuri": "look"
+  },
+  "lookCooldownSeconds": 20,
+  "likesForBlink": 50,
+  "joinLookCooldownSeconds": 45,
+  "moodGoal": 1000,
+  "likesPerMoodPoint": 5,
+  "maxRepeatInARow": 2,
+  "moods": {
+    "excited": {
+      "label": "Delighted",
+      "weights": {
+        "chat": 4,
+        "blink": 3,
+        "pawwash": 1,
+        "cloak": 1,
+        "tailspirits": 1
+      },
+      "caption": null
+    },
+    "content": {
+      "label": "Content",
+      "weights": {
+        "chat": 3,
+        "pawwash": 3,
+        "blink": 3,
+        "cloak": 1,
+        "tailspirits": 0.5
+      },
+      "caption": null
+    },
+    "bored": {
+      "label": "Bored",
+      "afterSeconds": 120,
+      "weights": {
+        "cloak": 1,
+        "pawwash": 2,
+        "blink": 1,
+        "chat": 1,
+        "tailspirits": 1
+      },
+      "caption": "Her Highness is waiting…"
+    },
+    "sleepy": {
+      "label": "Drowsy",
+      "afterSeconds": 240,
+      "weights": {
+        "blink": 4,
+        "pawwash": 1,
+        "chat": 0,
+        "cloak": 1,
+        "tailspirits": 0
+      },
+      "caption": "Drifting off to the rain…"
+    },
+    "ignored": {
+      "label": "Ignored",
+      "afterSeconds": 360,
+      "weights": {
+        "blink": 2,
+        "chat": 1,
+        "pawwash": 1,
+        "cloak": 1,
+        "tailspirits": 0.5
+      },
+      "caption": "One gift wins her back…"
+    }
+  },
+  "excitement": {
+    "giftSeconds": 60,
+    "likesWindowSeconds": 30,
+    "likesToExcite": 30,
+    "chatsToExcite": 5
+  },
+  "cheerUpLine": "won Zuri back",
+  "audio": {
+    "dir": "sounds",
+    "music": "lofi",
+    "musicVolume": 0.5,
+    "quietMoods": [
+      "sleepy",
+      "ignored"
+    ],
+    "quietMusicVolume": 0.3,
+    "clipVolume": 1.0
+  },
+  "giftCatalogNote": "Rose, Ice Cream Cone, Overreact, Perfume, Twinkling Star, Money Gun, Galaxy, Fox Legend are in TikTok's catalog (season2/tiktok-gift-catalog.txt). Pumpkin, Lightning Bolt, Witchy Kitty are Halloween seasonal gifts from third-party lists; matching ignores spaces/case and the server logs every gift name, so check the log on the first LIVE. 'value' is the approximate coin price, used only to order the queue when a gift's real coin value is missing (tests). Never shown on stream.",
+  "modes": {
+    "sleep": {
+      "label": "Asleep",
+      "enter": "sleep-in",
+      "loop": "sleep-loop",
+      "exit": "sleep-out",
+      "afterSeconds": 60,
+      "interruptible": true,
+      "caption": "Shh… she’s dreaming",
+      "quietMusic": true
+    }
+  },
+  "likesForRainwatch": 300,
+  "surprises": {
+    "enabled": true,
+    "title": "✦ Zuri’s whim",
+    "everyMinutes": [
+      3,
+      7
+    ],
+    "quietAfterGiftSeconds": 45,
+    "pool": {
+      "mirror": {
+        "weight": 5,
+        "cooldownMinutes": 8,
+        "line": "she couldn’t resist her mirror"
+      },
+      "rainwatch": {
+        "weight": 5,
+        "cooldownMinutes": 8,
+        "line": "she had to watch the rain"
+      },
+      "awaken": {
+        "weight": 0.4,
+        "cooldownMinutes": 90,
+        "line": "the storm stirred her nine tails…",
+        "big": true
+      },
+      "tailspirits": {
+        "weight": 4,
+        "cooldownMinutes": 10,
+        "line": "her tail spirits got loose…"
+      }
+    }
+  },
+  "queue": {
+    "maxPendingGifts": 6,
+    "ageBonusPerSecond": 0.5,
+    "quietAfterSeconds": 30
+  },
+  "variants": {
+    "chat": [
+      "chat",
+      "chat-lean"
+    ],
+    "pumpkin": [
+      "pumpkin",
+      "pumpkin-stand"
+    ]
+  }
+}

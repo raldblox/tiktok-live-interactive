@@ -1,0 +1,85 @@
+{
+  "brand": "Noct • Unheard Places",
+  "mascot": "Noct",
+  "volume": 0.55,
+  "currency": "$",
+  "dreamSeconds": 120,
+
+  "home": {
+    "id": "home", "name": "Noct's Apartment",
+    "sky": ["#2a1d1a", "#09070a"], "glow": ["#ffb36b", "#6b4cff", "#ff6b4a"],
+    "particles": "dust", "sound": ["home", "rain"],
+    "idle": "cat/idle.mp4",
+    "idleVariants": [
+      { "clip": "cat/groom.mp4", "anim": "groom", "sound": null },
+      { "clip": "cat/yawn.mp4", "anim": "yawn", "sound": null },
+      { "clip": "cat/tail.mp4", "anim": "tail", "sound": null },
+      { "clip": "cat/stare.mp4", "anim": "stare", "sound": "meow" }
+    ],
+    "idleEverySeconds": [18, 35]
+  },
+
+  "actions": {
+    "cup":      { "clip": "cat/cup.mp4",      "anim": "cup",     "sound": "crash",   "damage": 12,  "counter": "cups", "line": "knocked {name}'s cup off the table", "victim": true },
+    "scratch":  { "clip": "cat/scratch.mp4",  "anim": "scratch", "sound": "scratch", "damage": 150, "couch": -12, "line": "scratched the couch for {name}" },
+    "plant":    { "clip": "cat/plant.mp4",    "anim": "pounce",  "sound": "thud",    "damage": 45,  "line": "murdered the plant for {name}" },
+    "hiss":     { "clip": "cat/hiss.mp4",     "anim": "hiss",    "sound": "hiss",    "damage": 0,   "line": "hissed at absolutely nothing for {name}" },
+    "zoomies":  { "clip": "cat/zoomies.mp4",  "anim": "zoomies", "sound": "zoom",    "damage": 400, "line": "started the ZOOMIES", "shake": true },
+    "biscuits": { "clip": "cat/biscuits.mp4", "anim": "knead",   "sound": "purr",    "line": "is making biscuits for {name}" },
+    "blink":    { "clip": "cat/blink.mp4",    "anim": "blink",   "sound": "purr",    "line": "slow-blinked at {name} (that means I love you)" },
+    "look":     { "clip": "cat/look.mp4",     "anim": "look",    "sound": "meow",    "line": "heard the pspsps" }
+  },
+
+  "gifts": [
+    { "gift": "Rose",           "icon": "🌹", "coins": 1,    "team": "chaos", "action": "cup",      "label": "Knock YOUR cup off" },
+    { "gift": "GG",             "icon": "🎮", "coins": 1,    "team": "chaos", "action": "hiss",     "label": "Hiss at nothing" },
+    { "gift": "Finger Heart",   "icon": "🫰", "coins": 5,    "team": "chaos", "action": "scratch",  "label": "Scratch the couch" },
+    { "gift": "Perfume",        "icon": "🧴", "coins": 20,   "team": "chaos", "action": "plant",    "label": "Attack the plant" },
+    { "gift": "Doughnut",       "icon": "🍩", "coins": 30,   "team": "chaos", "action": "zoomies",  "label": "ZOOMIES" },
+    { "gift": "Ice Cream Cone", "icon": "🍦", "coins": 1,    "team": "nap",   "action": "biscuits", "label": "Make biscuits" },
+    { "gift": "Heart Me",       "icon": "💗", "coins": 1,    "team": "nap",   "action": "blink",    "label": "Slow blink at you" },
+    { "gift": "Hand Hearts",    "icon": "🤲", "coins": 100,  "team": "nap",   "dream": "whale",     "label": "Dream: Inside a Whale" },
+    { "gift": "Confetti",       "icon": "🎊", "coins": 100,  "team": "nap",   "dream": "crystal",   "label": "Dream: Crystal Moon Cave" },
+    { "gift": "Money Gun",      "icon": "💸", "coins": 500,  "team": "nap",   "dream": "island",    "label": "Dream: Campfire in the Sky" },
+    { "gift": "Galaxy",         "icon": "🌌", "coins": 1000, "team": "nap",   "dream": "random",    "label": "Dream: somewhere unknown", "epic": true }
+  ],
+  "defaultGift": { "team": "chaos", "action": "cup" },
+
+  "tug": {
+    "threshold": 300,
+    "chaosEvent": { "title": "3 AM ZOOMIES", "action": "zoomies", "repeat": 2 },
+    "napEvent":   { "title": "Noct fell asleep…", "dream": "random" }
+  },
+  "couch": { "hp": 100, "replaceCost": 900 },
+
+  "places": [
+    { "id": "whale", "name": "Inside a Sleeping Whale", "icon": "🐋",
+      "sky": ["#0b3a52", "#020a12"], "glow": ["#3fd0ff", "#1f6bff", "#7cf5d6"],
+      "particles": "bubbles", "sound": ["whale", "purr"], "bg": "places/whale.mp4", "catInVideo": true },
+    { "id": "cloud", "name": "Rain Inside a Cloud", "icon": "☁️",
+      "sky": ["#5a6580", "#141a26"], "glow": ["#c9d7ff", "#8aa2ff", "#ffffff"],
+      "particles": "rain", "sound": ["rain", "wind", "purr"], "bg": "places/cloud.mp4", "catInVideo": true },
+    { "id": "crystal", "name": "Crystal Cave on the Moon", "icon": "💎",
+      "sky": ["#2a1856", "#05030f"], "glow": ["#b48cff", "#5ee7ff", "#ff8ce6"],
+      "particles": "sparkles", "sound": ["crystal", "purr"], "bg": "places/crystal.mp4", "catInVideo": true },
+    { "id": "island", "name": "Campfire in the Sky", "icon": "🔥",
+      "sky": ["#3a160c", "#0a0404"], "glow": ["#ff8a3d", "#ffcf6b", "#ff4d4d"],
+      "particles": "embers", "sound": ["fire", "crickets", "purr"], "bg": "places/island.mp4", "catInVideo": true }
+  ],
+
+  "likeMeter": { "label": "Treat jar", "target": 500, "action": "blink" },
+  "chatCommands": {
+    "pspsps": "look", "psps": "look", "pspspsps": "look", "pspspspsps": "look",
+    "here kitty": "ignore", "come here": "ignore", "kitty": "ignore", "noct": "ignore",
+    "bad cat": "ignore", "no": "ignore",
+    "meow": "meow"
+  },
+  "ignoreLines": [
+    "Noct heard you. Noct does not care.",
+    "Request denied by the cat.",
+    "Noct looked at you, then looked away.",
+    "Noct is busy. Doing nothing.",
+    "Your message has been left on read."
+  ],
+  "lookCooldownSeconds": 20
+}

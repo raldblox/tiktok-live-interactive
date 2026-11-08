@@ -1,0 +1,172 @@
+{
+  "name": "Latte",
+  "clipsDir": "videos",
+  "res": "720p",
+  "idle": null,
+  "moments": {
+    "chat": {
+      "weight": 3,
+      "repeat": true
+    },
+    "pawwash": {
+      "weight": 3,
+      "repeat": true
+    },
+    "yawn": {
+      "weight": 3,
+      "repeat": true
+    },
+    "feather": {
+      "weight": 1,
+      "repeat": false
+    },
+    "window": {
+      "weight": 1,
+      "repeat": false
+    }
+  },
+  "momentEverySeconds": [
+    0,
+    0
+  ],
+  "fallbackClip": "chat",
+  "gifts": [
+    {
+      "gift": "Rose",
+      "icon": "🌹",
+      "coins": 1,
+      "clip": "rose",
+      "line": "gave Latte a rose"
+    },
+    {
+      "gift": "GG",
+      "icon": "🎮",
+      "coins": 1,
+      "clip": "gg",
+      "line": "started Latte's gamer moment"
+    },
+    {
+      "gift": "Overreact",
+      "icon": "😱",
+      "coins": 5,
+      "clip": "overreact",
+      "line": "made Latte overreact"
+    },
+    {
+      "gift": "Money Gun",
+      "icon": "💸",
+      "coins": 500,
+      "clip": "moneygun",
+      "line": "turned on Latte's boss mode",
+      "big": true
+    },
+    {
+      "gift": "Galaxy",
+      "icon": "🌌",
+      "coins": 1000,
+      "clip": "galaxy",
+      "line": "sent Latte to space",
+      "big": true
+    }
+  ],
+  "defaultGift": {
+    "clip": "chat",
+    "line": "sent Latte a gift"
+  },
+  "chatCommands": {
+    "pspsps": "look",
+    "psps": "look",
+    "latte": "look",
+    "hi latte": "look"
+  },
+  "lookCooldownSeconds": 20,
+  "moodGoal": 1000,
+  "likesPerMoodPoint": 5,
+  "maxRepeatInARow": 2,
+  "moods": {
+    "excited": {
+      "label": "Excited",
+      "emoji": "🤩",
+      "weights": {
+        "chat": 4,
+        "feather": 3,
+        "pawwash": 1,
+        "yawn": 1,
+        "window": 0
+      },
+      "caption": null
+    },
+    "content": {
+      "label": "Content",
+      "emoji": "😊",
+      "weights": {
+        "chat": 3,
+        "pawwash": 3,
+        "yawn": 3,
+        "feather": 1,
+        "window": 1
+      },
+      "caption": null
+    },
+    "bored": {
+      "label": "Bored",
+      "emoji": "😑",
+      "afterSeconds": 120,
+      "weights": {
+        "window": 3,
+        "yawn": 3,
+        "pawwash": 2,
+        "chat": 1,
+        "feather": 0
+      },
+      "caption": "Latte is waiting for you…"
+    },
+    "sleepy": {
+      "label": "Sleepy",
+      "emoji": "😴",
+      "afterSeconds": 240,
+      "weights": {
+        "yawn": 5,
+        "window": 2,
+        "pawwash": 1,
+        "chat": 0,
+        "feather": 0
+      },
+      "caption": "Latte is getting sleepy…"
+    },
+    "ignored": {
+      "label": "Ignored",
+      "emoji": "🥺",
+      "afterSeconds": 360,
+      "weights": {
+        "yawn": 3,
+        "window": 3,
+        "chat": 1,
+        "pawwash": 0,
+        "feather": 0
+      },
+      "caption": "Latte feels ignored. One gift would cheer her up"
+    }
+  },
+  "excitement": {
+    "giftSeconds": 60,
+    "likesWindowSeconds": 30,
+    "likesToExcite": 30,
+    "chatsToExcite": 5
+  },
+  "cheerUpLine": "cheered Latte up 💗",
+  "audio": {
+    "dir": "sounds",
+    "music": "lofi",
+    "ambience": null,
+    "musicVolume": 0.7,
+    "ambienceVolume": 0.6,
+    "effectsVolume": 1.0,
+    "quietMoods": [
+      "sleepy",
+      "ignored"
+    ],
+    "quietMusicVolume": 0.4,
+    "effects": false
+  }
+}

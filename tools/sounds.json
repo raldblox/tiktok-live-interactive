@@ -1,0 +1,56 @@
+{
+  "model": "eleven_text_to_sound_v2",
+  "outDir": "public/sounds",
+  "sounds": {
+    "lofi": {
+      "seconds": 30,
+      "loop": true,
+      "prompt": "Chill lo-fi hip hop instrumental beat, soft mellow electric piano chords, warm vinyl crackle, slow relaxed boom-bap drums, gentle bass, cozy late-night bedroom vibe, calm and soothing, no vocals"
+    },
+    "ambience": {
+      "seconds": 30,
+      "loop": true,
+      "prompt": "Continuous steady rain sound, medium rain falling on a window and rooftop, clearly audible soothing rain recorded close to the glass, even and constant, no thunder, no music, no voices"
+    },
+    "rose": {
+      "seconds": 6,
+      "prompt": "A small cat sniffing a flower with soft quick sniffing sounds, then a tiny cute cat sneeze, followed by a soft content purr, quiet room"
+    },
+    "gg": {
+      "seconds": 6,
+      "prompt": "A bright cheerful video game victory jingle with sparkly chimes and a small confetti pop, followed by a happy little cat chirp"
+    },
+    "overreact": {
+      "seconds": 7,
+      "prompt": "Dramatic soap opera orchestral sting dun dun dunnn, then a soft thump of a small cat flopping onto a fluffy blanket, a short pause, then a tiny cute meow"
+    },
+    "moneygun": {
+      "seconds": 8,
+      "prompt": "A money gun rapidly shooting paper bills with a fast brrrt sound, paper money fluttering and flapping through the air, ending with a cash register cha-ching"
+    },
+    "galaxy": {
+      "seconds": 8,
+      "prompt": "Magical shimmering space ambience swelling in, soft ethereal choir and twinkling chimes, a shooting star whoosh, then gently fading back out to silence"
+    },
+    "chat": {
+      "seconds": 6,
+      "prompt": "A curious kitten making a soft questioning mrrp trill, then a gentle short sweet meow, quiet cozy room"
+    },
+    "pawwash": {
+      "seconds": 7,
+      "prompt": "ASMR close-up microphone recording of a cat licking and grooming its paw, clearly audible wet tongue licks and soft fur brushing sounds, steady rhythm"
+    },
+    "yawn": {
+      "seconds": 5,
+      "prompt": "Clearly audible close-up recording of a cat yawning: a long breathy airy exhale through an open mouth, ending with a soft lip smack, natural and warm, no squeak, no creak, no meow"
+    },
+    "feather": {
+      "seconds": 5,
+      "prompt": "A soft feather toy rustling and swishing through the air, a playful kitten chirping and trilling while trying to catch it"
+    },
+    "window": {
+      "seconds": 8,
+      "prompt": "A happy cat purring softly and steadily, close and warm, with gentle rain falling outside a window"
+    }
+  }
+}

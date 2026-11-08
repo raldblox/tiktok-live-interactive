@@ -1,0 +1,25 @@
+{
+  "name": "tiktok-live-interactive",
+  "version": "1.0.0",
+  "description": "Interactive TikTok LIVE apps where viewers' gifts, likes and chat drive the stream in real time",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "keywords": [
+    "tiktok-live",
+    "overlay",
+    "websocket",
+    "ai-video",
+    "runway",
+    "interactive-stream"
+  ],
+  "author": "raldblox",
+  "license": "MIT",
+  "type": "commonjs",
+  "dependencies": {
+    "@runwayml/sdk": "^4.22.0",
+    "express": "^4.21.2",
+    "tiktok-live-connector": "^2.5.0",
+    "ws": "^8.18.0"
+  }
+}

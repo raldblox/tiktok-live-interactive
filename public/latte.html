@@ -1,0 +1,390 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Latte LIVE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,700;0,800;0,900;1,700;1,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #fffaf6;
+    --soft: rgba(255,250,246,.78);
+    --pink: #ff8fb1;
+    --blush: #ffc6d6;
+    --gold: #ffd98a;
+    --glass: rgba(46,24,32,.42);
+    --edge: rgba(255,255,255,.24);
+    --font: "Nunito", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+  body { font-family: var(--font); color: var(--ink); -webkit-font-smoothing: antialiased; }
+  #stage { position: absolute; width: 1080px; height: 1920px; left: 50%; top: 50%; transform-origin: center; overflow: hidden; background: #1a1012; }
+
+  /* Two players take turns; every clip starts on the same idle frame, so swaps are invisible. */
+  video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .15s linear; }
+  video.front { opacity: 1; z-index: 2; }
+  video.back { z-index: 1; }
+  #poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+
+  /* One visual language: soft frosted pills, same radius, same type scale. */
+  .ui { position: absolute; z-index: 5; }
+  .pill { background: var(--glass); border: 1.5px solid var(--edge); border-radius: 40px;
+    backdrop-filter: blur(18px) saturate(150%); -webkit-backdrop-filter: blur(18px) saturate(150%);
+    box-shadow: 0 12px 30px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.22); }
+  .label { font: 900 15px/1 var(--font); letter-spacing: .14em; text-transform: uppercase; color: var(--blush); }
+  .shadow { text-shadow: 0 2px 12px rgba(0,0,0,.55); }
+
+  /* Left column: favorite human, then Latte's mood + love meter, then the hint. The right side is left free for the gift menu image. */
+  #fav { left: 36px; top: 205px; width: 330px; display: flex; align-items: center; gap: 14px; padding: 9px 24px 9px 9px; max-width: 440px; }
+  .av { width: 60px; height: 60px; flex: none; border-radius: 50%; padding: 3px; background: conic-gradient(var(--pink), var(--gold), var(--pink)); }
+  .av i { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 50%; background: #4a2a35 center/cover; font: 900 26px var(--font); font-style: normal; color: var(--blush); }
+  #fav .n { font: 900 25px/1.15 var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 230px; margin-top: 5px; }
+  #fav.steal { animation: pop .9s ease; }
+
+  #mood { left: 36px; top: 300px; width: 330px; padding: 14px 22px 16px; border-radius: 30px; }
+  #mood .state { display: flex; align-items: center; gap: 10px; margin-top: 8px; font: 900 27px/1 var(--font); }
+  #mood .state .e { font-size: 30px; }
+  #mood .meter { display: flex; align-items: center; gap: 10px; margin-top: 13px; }
+  #mood .meter span { font: 800 15px var(--font); color: var(--soft); white-space: nowrap; }
+  #mood .bar { flex: 1; height: 9px; border-radius: 9px; background: rgba(255,255,255,.2); overflow: hidden; }
+  #mood .bar i { display: block; height: 100%; width: 0; border-radius: 9px; background: linear-gradient(90deg, var(--pink), var(--blush)); box-shadow: 0 0 12px rgba(255,143,177,.8); transition: width .6s ease; }
+  #mood.change { animation: pop .7s ease; }
+  #hint { left: 36px; top: 440px; width: 330px; text-align: center; font: italic 800 19px var(--font); color: var(--ink); }
+
+  /* Middle band (between the sign and Latte): mood caption, gift callout, toasts. */
+  #caption { left: 36px; width: 440px; top: 492px; text-align: left; font: italic 900 32px/1.2 var(--font);
+    opacity: 0; transform: translateY(10px); transition: opacity .9s ease, transform .9s ease; }
+  #caption.on { opacity: 1; transform: none; }
+
+  #callout { left: 50%; top: 770px; display: flex; align-items: center; gap: 14px; padding: 9px 28px 9px 9px; white-space: nowrap;
+    transform: translate(-50%, 14px) scale(.96); opacity: 0; transition: all .4s cubic-bezier(.2,.9,.3,1.25); }
+  #callout.on { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  #callout.big { border-color: rgba(255,217,138,.85); box-shadow: 0 0 36px rgba(255,200,90,.45), inset 0 1px 0 rgba(255,255,255,.22); }
+  #callout .who { font: 900 24px/1.1 var(--font); }
+  #callout .what { font: italic 800 23px/1.2 var(--font); color: var(--blush); }
+
+  #toast { left: 50%; top: 868px; padding: 12px 26px; font: 800 22px var(--font); white-space: nowrap; transform: translate(-50%, 10px); opacity: 0; transition: all .35s; }
+  #toast.on { opacity: 1; transform: translate(-50%, 0); }
+
+  .heart { position: absolute; z-index: 4; font-size: 44px; pointer-events: none; animation: rise 2.2s ease-out forwards; }
+  @keyframes rise { 0% { transform: translateY(0) scale(.6); opacity: 0 } 15% { opacity: 1 } 100% { transform: translateY(-340px) scale(1.15); opacity: 0 } }
+  @keyframes pop { 35% { transform: scale(1.06) } }
+
+  #status { left: 12px; bottom: 6px; font: 700 14px var(--font); opacity: .5; display: none; }
+  .debug #status { display: block; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <img id="poster" alt="">
+  <video id="vA" class="front" muted playsinline preload="auto"></video>
+  <video id="vB" class="back" muted playsinline preload="auto"></video>
+
+  <div id="fav" class="ui pill"><div class="av"><i id="favPic">♛</i></div><div><div class="label">Favorite human</div><div class="n" id="favName">could be you</div></div></div>
+  <div id="mood" class="ui pill">
+    <div class="label">Latte is</div>
+    <div class="state"><span class="e" id="moodEmoji">😊</span><span id="moodLabel">Content</span></div>
+    <div class="meter"><span>Love</span><div class="bar"><i id="loveBar"></i></div><span id="loveNum">0%</span></div>
+  </div>
+  <div id="hint" class="ui shadow">Type “pspsps” and she'll look</div>
+
+  <div id="caption" class="ui shadow"></div>
+  <div id="callout" class="ui pill"><div class="av"><i id="cPic"></i></div><div><div class="who" id="cWho"></div><div class="what" id="cWhat"></div></div></div>
+  <div id="toast" class="ui pill"></div>
+  <div id="status" class="ui"></div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const R = Math.random;
+const stage = $('stage');
+const params = new URLSearchParams(location.search);
+if (params.has('debug')) document.body.classList.add('debug');
+const fit = () => { const s = Math.min(innerWidth / 1080, innerHeight / 1920); stage.style.transform = `translate(-50%, -50%) scale(${s})`; };
+addEventListener('resize', fit); fit();
+
+let cfg; const available = new Set();
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem('latte_' + k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('latte_' + k, JSON.stringify(v)); } catch {} },
+};
+let state = Object.assign({ love: 0, fans: {}, likesBank: 0 }, store.get('state', {}));
+const save = () => store.set('state', state);
+const url = (name) => `/${cfg.clipsDir}/${name}-${cfg.res}.mp4`;
+
+// ---------- sound: lo-fi + rain beds always on, one effect per clip, music dims when she's sleepy ----------
+const sfx = {};               // clip name -> preloaded <audio>
+let music = null, rain = null, audioOk = null;
+const soundUrl = (name) => `/${cfg.audio.dir}/${name}.mp3`;
+function fadeTo(el, target, ms = 1500) {
+  if (!el) return;
+  const start = el.volume, t0 = performance.now();
+  const step = (t) => { const k = Math.min(1, (t - t0) / ms); el.volume = start + (target - start) * k; if (k < 1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+async function startBeds() {
+  const tryPlay = async (el) => { try { await el.play(); return true; } catch { return false; } };
+  const ok = (await tryPlay(music)) && (!rain || (await tryPlay(rain)));
+  if (audioOk !== !!ok) { audioOk = !!ok; report({ type: 'audio', ok: audioOk }); }
+}
+function playSfx(name) {
+  const a = sfx[name]; if (!a) return;
+  a.currentTime = 0; a.volume = cfg.audio.effectsVolume;
+  a.play().catch(() => {});
+}
+async function setupAudio() {
+  const make = (name, loop, vol) => { const el = new Audio(soundUrl(name)); el.loop = loop; el.volume = vol; el.preload = 'auto'; return el; };
+  if (await headOk(soundUrl(cfg.audio.music))) music = make(cfg.audio.music, true, cfg.audio.musicVolume);
+  if (cfg.audio.ambience && await headOk(soundUrl(cfg.audio.ambience))) rain = make(cfg.audio.ambience, true, cfg.audio.ambienceVolume);
+  const names = [...Object.keys(cfg.moments), ...cfg.gifts.map((g) => g.clip)];
+  // Clip sound effects are optional (stream.json audio.effects); lo-fi alone is the default.
+  if (cfg.audio.effects !== false) await Promise.all(names.map(async (n) => { if (await headOk(soundUrl(n))) sfx[n] = make(n, false, cfg.audio.effectsVolume); }));
+  await startBeds();
+  // If the host blocked autoplay, keep retrying quietly (LIVE Studio normally allows it).
+  setInterval(() => { if (!audioOk) startBeds(); }, 5000);
+}
+
+// ---------- mood: driven by what's happening in the room ----------
+// Gifts (and bursts of likes or chat) make her excited. With no gifts she drifts:
+// content -> bored -> sleepy -> ignored. Each mood favors different idle clips and has its own caption.
+let lastGiftAt = 0;              // set in init so she starts Content, not Excited
+const likeTimes = [], chatTimes = [];
+let mood = 'content';
+
+function computeMood() {
+  const now = Date.now(), ex = cfg.excitement;
+  const recent = (arr, s) => { while (arr.length && now - arr[0].t > s * 1000) arr.shift(); return arr.reduce((t, x) => t + x.n, 0); };
+  if (now - lastGiftAt < ex.giftSeconds * 1000 ||
+      recent(likeTimes, ex.likesWindowSeconds) >= ex.likesToExcite ||
+      recent(chatTimes, ex.likesWindowSeconds) >= ex.chatsToExcite) return 'excited';
+  const since = (now - lastGiftAt) / 1000;
+  const drift = Object.entries(cfg.moods).filter(([, m]) => m.afterSeconds && since >= m.afterSeconds)
+    .sort((a, b) => b[1].afterSeconds - a[1].afterSeconds)[0];
+  return drift ? drift[0] : 'content';
+}
+
+function setMood(next) {
+  if (next === mood) return;
+  mood = next;
+  const m = cfg.moods[mood];
+  $('moodEmoji').textContent = m.emoji; $('moodLabel').textContent = m.label;
+  $('mood').classList.remove('change'); void $('mood').offsetWidth; $('mood').classList.add('change');
+  // Caption: fade the old one out completely before the new one fades in.
+  $('caption').classList.remove('on');
+  setTimeout(() => { $('caption').textContent = m.caption || ''; if (m.caption) $('caption').classList.add('on'); }, 900);
+  report({ type: 'mood', name: mood });
+  if (music) fadeTo(music, cfg.audio.quietMoods.includes(mood) ? cfg.audio.quietMusicVolume : cfg.audio.musicVolume, 3000);
+}
+setInterval(() => cfg && setMood(computeMood()), 1000);
+
+// ---------- seamless clip player ----------
+let cur = $('vA'), nxt = $('vB');
+let nxtPlan = null;            // { clip, job } prepared in the back player
+const actionQ = [];            // gift/chat reactions waiting their turn
+let lastMoment = null, repeatCount = 0;
+
+// Weighted random idle moment for the current mood. Common moments may repeat (up to maxRepeatInARow);
+// rare ones never play twice in a row.
+function pickMoment() {
+  const weights = cfg.moods[mood]?.weights || {};
+  const pool = Object.entries(cfg.moments).map(([name, m]) => [name, m, weights[name] ?? m.weight])
+    .filter(([name, m, w]) => w > 0 && available.has(name) && (name !== lastMoment || (m.repeat && repeatCount < (cfg.maxRepeatInARow || 2))));
+  const total = pool.reduce((t, [, , w]) => t + w, 0);
+  let r = R() * total;
+  for (const [name, , w] of pool) { if ((r -= w) < 0) return name; }
+  return [...available].find((n) => cfg.moments[n] && n !== lastMoment) || lastMoment;
+}
+
+function planNext() {
+  if (actionQ.length) return { clip: actionQ[0].clip, job: actionQ[0] };
+  return { clip: pickMoment() };
+}
+
+function prepare() {
+  nxtPlan = planNext();
+  if (nxt.dataset.clip !== nxtPlan.clip) {
+    nxt.dataset.clip = nxtPlan.clip;
+    nxt.src = url(nxtPlan.clip);
+    nxt.load();
+  }
+  nxt.currentTime = 0;
+}
+
+// Something urgent arrived (gift, pspsps, mood change): re-plan what plays next if there is still time to load it.
+function replan() {
+  const left = (cur.duration || 0) - (cur.currentTime || 0);
+  if (left > 0.6) prepare();
+}
+
+async function swap() {
+  const plan = nxtPlan;
+  if (nxt.readyState < 2) await new Promise((r) => nxt.addEventListener('canplay', r, { once: true }));
+  await nxt.play().catch(() => {});
+  nxt.className = 'front'; cur.className = 'back';
+  [cur, nxt] = [nxt, cur];
+  report({ type: 'clip', name: plan.clip, queued: actionQ.length, mood });
+  playSfx(plan.clip);
+  if (plan.job) { actionQ.shift(); if (plan.job.onStart) plan.job.onStart(); }
+  if (cfg.moments[plan.clip]) { repeatCount = plan.clip === lastMoment ? repeatCount + 1 : 1; lastMoment = plan.clip; }
+  prepare();
+}
+
+// Watchdog: a live stream must never freeze. Resume a paused clip; skip past a missed "ended" event.
+let lastT = -1, stuckFor = 0;
+setInterval(() => {
+  if (document.hidden || !cur.src) return;
+  if (cur.paused && !cur.ended) cur.play().catch(() => {});
+  stuckFor = cur.currentTime === lastT ? stuckFor + 1 : 0;
+  lastT = cur.currentTime;
+  if (stuckFor >= 3 && cur.duration && cur.duration - cur.currentTime < 0.5) { stuckFor = 0; swap(); }
+}, 500);
+
+function startPlayer() {
+  for (const v of [$('vA'), $('vB')]) v.addEventListener('ended', () => { if (v === cur) swap(); });
+  const first = pickMoment();
+  lastMoment = first; repeatCount = 1;
+  cur.dataset.clip = first; cur.src = url(first);
+  cur.play().catch(() => {});
+  playSfx(first);
+  prepare();
+}
+
+// Queue a reaction clip. Big gifts jump ahead of small ones.
+function react(clip, job = {}) {
+  const c = available.has(clip) ? clip : cfg.fallbackClip;
+  const item = { ...job, clip: c };
+  if (job.big) {
+    const i = actionQ.findIndex((x) => !x.big);
+    actionQ.splice(i < 0 ? actionQ.length : i, 0, item);
+  } else actionQ.push(item);
+  if (actionQ[0] === item) replan();
+}
+
+// ---------- UI ----------
+function avatar(el, name, pic) { el.style.backgroundImage = pic ? `url("${pic}")` : ''; el.textContent = pic ? '' : (String(name || '?').trim()[0] || '?').toUpperCase(); }
+const callQ = []; let calling = false;
+function callout(c) { callQ.push(c); if (!calling) nextCall(); }
+async function nextCall() {
+  const c = callQ.shift(); if (!c) { calling = false; return; }
+  calling = true;
+  $('cWho').textContent = c.who; $('cWhat').textContent = c.what; avatar($('cPic'), c.who, c.pic);
+  $('callout').className = 'ui pill on' + (c.big ? ' big' : '');
+  await sleep(callQ.length > 2 ? 1600 : 3000);
+  $('callout').className = 'ui pill' + (c.big ? ' big' : '');
+  await sleep(400); nextCall();
+}
+let toastT;
+function toast(t) { $('toast').textContent = t; $('toast').classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => $('toast').classList.remove('on'), 3000); }
+function hearts(n = 3) {
+  for (let i = 0; i < n; i++) setTimeout(() => {
+    const h = document.createElement('div'); h.className = 'heart'; h.textContent = '♥';
+    h.style.color = ['#ff8fb1', '#ffc6d6', '#fff'][i % 3];
+    h.style.left = (380 + R() * 320) + 'px'; h.style.top = '1180px';
+    stage.appendChild(h); setTimeout(() => h.remove(), 2300);
+  }, i * 180);
+}
+
+function render() {
+  const pct = Math.min(100, Math.round(state.love / cfg.moodGoal * 100));
+  $('loveBar').style.width = pct + '%'; $('loveNum').textContent = pct + '%';
+  const top = Object.values(state.fans).sort((a, b) => b.coins - a.coins)[0];
+  if (top) { $('favName').textContent = top.name; avatar($('favPic'), top.name, top.pic); }
+  else { $('favName').textContent = 'could be you'; avatar($('favPic'), '♛', ''); }
+}
+
+function addLove(points) {
+  state.love += points;
+  if (state.love >= cfg.moodGoal) {
+    state.love = 0;
+    callout({ who: 'Love meter full', what: 'Latte is SO happy right now', big: true });
+    hearts(8);
+    react('feather');
+  }
+  save(); render();
+}
+
+// ---------- events ----------
+let lastLook = 0;
+function handle(ev) {
+  if (ev.type === 'status') { $('status').textContent = ev.text; return; }
+  if (ev.type === 'reload') { location.reload(); return; }
+  if (ev.type === 'reset') { state = { love: 0, fans: {}, likesBank: 0 }; lastGiftAt = state.lastGiftAt = Date.now() - cfg.excitement.giftSeconds * 1000; save(); render(); return; }
+
+  if (ev.type === 'gift') {
+    const g = cfg.gifts.find((x) => x.gift.toLowerCase() === String(ev.gift).toLowerCase()) || cfg.defaultGift;
+    const n = Math.max(1, ev.count || 1), coins = (ev.coins || g.coins || 1) * n;
+    const who = ev.user.name;
+    // Any gift resets her mood clock: captions fade away and she's excited again.
+    const wasDown = ['bored', 'sleepy', 'ignored'].includes(mood);
+    lastGiftAt = state.lastGiftAt = Date.now();
+    setMood(computeMood());
+    if (wasDown) toast(`${who} ${cfg.cheerUpLine}`);
+
+    const key = ev.user.id || who;
+    const prev = Object.values(state.fans).sort((a, b) => b.coins - a.coins)[0];
+    const f = state.fans[key] || { name: who, pic: ev.user.pic, coins: 0 };
+    f.coins += coins; f.name = who; f.pic = ev.user.pic || f.pic; state.fans[key] = f;
+    const now = Object.values(state.fans).sort((a, b) => b.coins - a.coins)[0];
+    if (prev && now.name !== prev.name) { $('fav').classList.remove('steal'); void $('fav').offsetWidth; $('fav').classList.add('steal'); toast(`${now.name} is Latte's new favorite human`); }
+
+    react(g.clip, { big: g.big, onStart: () => callout({ who, what: `${g.line}${n > 1 ? ' ×' + n : ''}`, pic: ev.user.pic, big: g.big }) });
+    hearts(g.big ? 8 : 3);
+    addLove(coins);
+  }
+
+  if (ev.type === 'like') {
+    likeTimes.push({ t: Date.now(), n: ev.count || 1 });
+    state.likesBank += ev.count || 1;
+    const pts = Math.floor(state.likesBank / cfg.likesPerMoodPoint);
+    state.likesBank -= pts * cfg.likesPerMoodPoint;
+    if (R() < 0.4) hearts(1);
+    if (pts) addLove(pts); else save();
+  }
+
+  if (ev.type === 'chat') {
+    chatTimes.push({ t: Date.now(), n: 1 });
+    const text = String(ev.text).trim().toLowerCase();
+    const cmd = cfg.chatCommands[text] || (/^(ps){2,}$/.test(text) ? 'look' : null);
+    if (cmd === 'look' && Date.now() - lastLook > cfg.lookCooldownSeconds * 1000 && !actionQ.length) {
+      lastLook = Date.now();
+      react('chat', { onStart: () => toast(`${ev.user.name}: pspsps 👀`) });
+    }
+  }
+  if (ev.type === 'follow') { toast(`${ev.user.name} followed Latte 💗`); hearts(4); }
+  if (ev.type === 'share') toast(`${ev.user.name} shared Latte's LIVE`);
+}
+
+let wsRef = null;
+const report = (m) => { try { if (wsRef && wsRef.readyState === 1) wsRef.send(JSON.stringify(m)); } catch {} };
+function connect() {
+  const ws = wsRef = new WebSocket(`ws://${location.host}`);
+  ws.onopen = () => ws.send(JSON.stringify({ type: 'hello', page: 'latte', w: innerWidth, h: innerHeight, dpr: devicePixelRatio, ua: navigator.userAgent.split('Gecko) ').pop() }));
+  ws.onmessage = (m) => handle(JSON.parse(m.data));
+  ws.onclose = () => setTimeout(connect, 2000);
+}
+async function headOk(u) { try { return (await fetch(u, { method: 'HEAD' })).ok; } catch { return false; } }
+
+async function init() {
+  cfg = await (await fetch('/config?name=stream')).json();
+  const names = [...Object.keys(cfg.moments), ...cfg.gifts.map((g) => g.clip), cfg.fallbackClip, cfg.defaultGift.clip];
+  await Promise.all([...new Set(names)].map(async (n) => (await headOk(url(n))) && available.add(n)));
+  $('poster').src = '/character/latte-anchor.jpg';
+  // ?preview=<mood> shows a mood with a sample callout, for design review.
+  if (params.get('preview')) {
+    lastGiftAt = Date.now() - ((cfg.moods[params.get('preview')]?.afterSeconds ?? 0) + 1) * 1000;
+    setTimeout(() => callout({ who: 'maria_23', what: 'made Latte overreact', big: false }), 300);
+  }
+  // Keep her mood clock across page reloads (LIVE Studio reloads sources when a scene is edited).
+  if (!params.get('preview')) lastGiftAt = state.lastGiftAt || Date.now() - cfg.excitement.giftSeconds * 1000;
+  render();
+  connect();
+  await setupAudio();
+  startPlayer();
+}
+init();
+</script>
+</body>
+</html>

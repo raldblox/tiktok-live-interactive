@@ -1,0 +1,509 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zuri Control Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0c0a; --panel: #18130f; --panel2: #201a15; --line: rgba(217,180,111,.22); --line2: rgba(217,180,111,.45);
+    --gold: #d9b46f; --ivory: #f3ece0; --muted: #a99f90; --good: #7fc79a; --warn: #e8b04f; --bad: #e57a6a;
+    --serif: "Cormorant Garamond", Georgia, serif; --sans: "Jost", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--ivory); font: 400 14px/1.4 var(--sans); min-height: 100vh; }
+  button, input, select { font: inherit; color: inherit; }
+  header { display: flex; align-items: center; gap: 18px; padding: 14px 22px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: rgba(15,12,10,.96); z-index: 5; flex-wrap: wrap; }
+  header h1 { font: italic 600 30px/1 var(--serif); color: var(--gold); }
+  header h1 small { font: 500 11px var(--sans); letter-spacing: .3em; text-transform: uppercase; color: var(--muted); margin-left: 10px; font-style: normal; }
+  .pill { display: inline-flex; align-items: center; gap: 8px; padding: 5px 12px; border: 1px solid var(--line); border-radius: 30px; font-size: 13px; white-space: nowrap; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+  .dot.good { background: var(--good); box-shadow: 0 0 8px var(--good); } .dot.warn { background: var(--warn); } .dot.bad { background: var(--bad); }
+  header .spacer { flex: 1; }
+  main { display: grid; grid-template-columns: 400px minmax(380px, 1fr) 360px; gap: 18px; padding: 18px 22px; align-items: start; }
+  @media (max-width: 1250px) { main { grid-template-columns: 400px 1fr; } #colStats { grid-column: 1 / -1; } }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 18px; }
+  .card h2 { font: 500 12px var(--sans); letter-spacing: .28em; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+  .card h2 .hint { letter-spacing: 0; text-transform: none; color: var(--muted); font-size: 12px; margin-left: auto; }
+  /* network */
+  .verdict { font: italic 600 34px/1.1 var(--serif); padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line2); }
+  .verdict.go { color: #9fe0b5; border-color: rgba(127,199,154,.6); background: rgba(127,199,154,.08); }
+  .verdict.caution { color: #f2c46d; border-color: rgba(232,176,79,.6); background: rgba(232,176,79,.08); }
+  .verdict.nogo { color: #f19a8c; border-color: rgba(229,122,106,.6); background: rgba(229,122,106,.08); }
+  .vnote { color: var(--muted); font-size: 13px; margin-top: 8px; }
+  .rec { margin-top: 10px; padding: 9px 12px; background: var(--panel2); border-radius: 8px; font-size: 13px; }
+  .rec b { color: var(--gold); }
+  .glab { color: var(--muted); font-size: 12px; } .glab b { color: var(--ivory); }
+  /* director */
+  .dnow { display: flex; gap: 14px; align-items: center; background: var(--panel2); border: 1px solid var(--line2); border-radius: 10px; padding: 14px; }
+  .dic { width: 54px; height: 54px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 28px; border: 1px solid var(--line2); }
+  .dt { font: italic 600 26px/1.1 var(--serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ds { color: var(--muted); font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin: 2px 0 6px; }
+  .dleft { font: 600 28px var(--serif); color: var(--gold); min-width: 58px; text-align: right; }
+  ol.dq { list-style: none; counter-reset: q; }
+  .dq li { display: grid; grid-template-columns: 22px 34px 1fr auto; gap: 10px; align-items: center; padding: 9px 4px; border-bottom: 1px solid rgba(217,180,111,.1); }
+  .dq li::before { counter-increment: q; content: counter(q); color: var(--muted); font-size: 12px; }
+  .dq .qi { font-size: 22px; } .dq .qn { min-width: 0; } .dq .qn b { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dq .qn small { color: var(--muted); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .dq .eta { font: 600 20px var(--serif); color: var(--gold); text-align: right; }
+  .dq .eta small { display: block; font: 400 11px var(--sans); color: var(--muted); }
+  .dq li.free { opacity: .6; }
+  .dq li.empty { display: block; color: var(--muted); padding: 10px 4px; } .dq li.empty::before { content: none; }
+  /* monitor */
+  #monitorWrap { position: relative; width: 100%; aspect-ratio: 9 / 16; background: #000; border-radius: 8px; overflow: hidden; border: 1px solid var(--line2); }
+  #monitor { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  #onair { position: absolute; left: 10px; top: 10px; z-index: 2; }
+  .now { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin-top: 14px; font-size: 13px; }
+  .now b { color: var(--muted); font-weight: 500; }
+  .bar { height: 4px; background: rgba(217,180,111,.18); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--gold); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { padding: 2px 9px; border-radius: 20px; background: var(--panel2); border: 1px solid var(--line); font-size: 12px; }
+  /* controls */
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 10px; }
+  input[type=text], input[type=number], select { background: var(--panel2); border: 1px solid var(--line); border-radius: 6px; padding: 7px 10px; outline: none; }
+  input[type=text]:focus, input[type=number]:focus, select:focus { border-color: var(--gold); }
+  input[type=number] { width: 80px; }
+  .btn { background: var(--panel2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; cursor: pointer; transition: border-color .15s, background .15s; }
+  .btn:hover { border-color: var(--gold); background: #2a2119; }
+  .btn:active { transform: translateY(1px); }
+  .btn.gold { background: linear-gradient(180deg, #e2c27f, #b48a45); color: #1b130c; border-color: transparent; font-weight: 600; }
+  .btn.danger:hover { border-color: var(--bad); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .gift { display: flex; align-items: center; gap: 10px; text-align: left; }
+  .gift .ic { font-size: 22px; }
+  .gift small { display: block; color: var(--muted); font-size: 11px; }
+  .gift.big { border-color: var(--line2); }
+  /* stats */
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .kpi { background: var(--panel2); border-radius: 8px; padding: 10px; }
+  .kpi span { display: block; color: var(--muted); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+  .kpi b { font: 600 26px/1.1 var(--serif); color: var(--ivory); }
+  ol.list, ul.list { list-style: none; max-height: 260px; overflow: auto; }
+  .list li { display: flex; justify-content: space-between; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(217,180,111,.08); font-size: 13px; }
+  .list li .t { color: var(--muted); font-size: 12px; white-space: nowrap; }
+  .test { color: var(--muted); font-size: 11px; border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; margin-left: 6px; }
+  .warnbox { border: 1px solid var(--warn); background: rgba(232,176,79,.08); border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 13px; display: none; }
+  .warnbox.on { display: block; }
+  /* settings */
+  #settings { grid-column: 1 / -1; }
+  .tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .tab { padding: 7px 14px; border-radius: 20px; border: 1px solid var(--line); cursor: pointer; background: transparent; }
+  .tab.on { background: var(--gold); color: #1b130c; border-color: var(--gold); font-weight: 600; }
+  .pane { display: none; } .pane.on { display: block; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { padding: 7px 8px; border-bottom: 1px solid rgba(217,180,111,.1); text-align: left; vertical-align: middle; }
+  th { color: var(--muted); font-weight: 500; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+  td .pct { color: var(--gold); font-size: 12px; margin-left: 6px; min-width: 36px; display: inline-block; }
+  .field { display: grid; grid-template-columns: 220px 1fr auto; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(217,180,111,.08); }
+  .field label { color: var(--ivory); } .field .help { color: var(--muted); font-size: 12px; grid-column: 1 / -1; margin-top: -4px; }
+  input[type=range] { width: 100%; accent-color: var(--gold); }
+  .savebar { display: flex; gap: 10px; align-items: center; margin-top: 14px; }
+  #dirty { color: var(--warn); display: none; } #dirty.on { display: inline; }
+  .toast { position: fixed; right: 20px; bottom: 20px; background: var(--panel2); border: 1px solid var(--gold); padding: 10px 16px; border-radius: 8px; opacity: 0; transition: opacity .3s; z-index: 9; }
+  .toast.on { opacity: 1; }
+  details summary { cursor: pointer; color: var(--gold); margin-top: 6px; }
+  details p, details li { color: var(--muted); font-size: 13px; margin: 6px 0 0 16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Zuri <small>Control Room</small></h1>
+  <span class="pill"><i class="dot" id="dTik"></i><span id="sTik">TikTok…</span></span>
+  <span class="pill"><i class="dot" id="dOv"></i><span id="sOv">Overlay…</span></span>
+  <span class="pill"><i class="dot" id="dSnd"></i><span id="sSnd">Sound…</span></span>
+  <span class="pill"><i class="dot" id="dNet"></i><span id="sNet">Network…</span></span>
+  <span class="spacer"></span>
+  <span class="pill" id="uptime">0:00:00</span>
+</header>
+
+<main>
+  <!-- left: the director's view of what's on stream -->
+  <section>
+    <div class="card">
+      <h2>Director <span class="hint">live, from LIVE Studio's overlay</span></h2>
+      <div class="dnow">
+        <div class="dic" id="dIc">·</div>
+        <div style="flex:1;min-width:0">
+          <div class="dt" id="dTitle">Waiting for the overlay…</div>
+          <div class="ds" id="dSub"></div>
+          <div class="bar"><i id="nBar"></i></div>
+        </div>
+        <div class="dleft" id="dLeft"></div>
+      </div>
+      <h2 style="margin-top:16px">Up next <span class="hint">costlier gifts first · same gift merged</span></h2>
+      <ol class="dq" id="dQueue"></ol>
+      <div class="now">
+        <b>Zuri is</b><span id="nMood">–</span>
+        <b>Sleep</b><span id="nSleep">–</span>
+        <b>Surprise</b><span id="nSurprise">–</span>
+        <b>Idle next</b><span id="nNext">–</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- middle: controls -->
+  <section>
+    <div class="warnbox" id="warns"></div>
+    <div class="card">
+      <h2>Fire a gift <span class="hint">test events are marked and never count as coins</span></h2>
+      <div class="row">
+        <input type="text" id="who" value="maria_23" style="width:170px" aria-label="viewer name">
+        <button class="btn" id="rand" title="random viewer name">🎲 Random name</button>
+        <label>× <input type="number" id="combo" value="1" min="1" max="99" aria-label="combo count"></label>
+      </div>
+      <div class="grid" id="giftBtns"></div>
+    </div>
+    <div class="card">
+      <h2>Viewers</h2>
+      <div class="row">
+        <button class="btn" data-like="25">♥ 25 likes</button>
+        <button class="btn" data-like="60">♥ 60 likes <small>(blink)</small></button>
+        <button class="btn" id="likeRain">♥ likes to rain milestone</button>
+        <button class="btn" id="psps">💬 “pspsps”</button>
+        <button class="btn" id="join">👋 Join</button>
+        <button class="btn" id="follow">➕ Follow</button>
+        <button class="btn" id="share">🔁 Share</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Direct control</h2>
+      <div class="row">
+        <button class="btn" id="cSleep">😴 Sleep now</button>
+        <button class="btn" id="cWake">☀️ Wake up</button>
+        <button class="btn" id="cSurprise">✦ Surprise now</button>
+        <button class="btn" id="cReload">⟳ Reload overlay</button>
+        <button class="btn danger" id="cReset" title="clears affection and favorite human on the overlay">Reset affection & favorite</button>
+      </div>
+      <h2 style="margin-top:14px">Play a clip next <span class="hint">plays after the current clip (wakes her first if asleep)</span></h2>
+      <div class="chips" id="clipBtns"></div>
+    </div>
+  </section>
+
+  <!-- right: stats -->
+  <section id="colStats">
+    <div class="card" id="netCard">
+      <h2>Network <span class="hint" id="netHint"></span></h2>
+      <div class="verdict" id="nVerdict">Checking…</div>
+      <div class="vnote" id="nNote"></div>
+      <div class="rec" id="nRec"></div>
+      <div class="kpis" style="margin-top:12px">
+        <div class="kpi"><span>Upload</span><b id="nUp">–</b></div>
+        <div class="kpi"><span>Download</span><b id="nDown">–</b></div>
+        <div class="kpi"><span>Ping</span><b id="nPing">–</b></div>
+      </div>
+      <div style="margin-top:12px"><span class="glab">Sending now <b id="nSend">–</b> Mbps</span>
+        <svg id="nGraph" viewBox="0 0 300 70" preserveAspectRatio="none" style="width:100%;height:70px;display:block;margin-top:6px"></svg></div>
+      <div class="row" style="margin:12px 0 0"><button class="btn" id="nTest">Run speed test</button><span class="glab" id="nWhen"></span></div>
+    </div>
+    <div class="card">
+      <h2>This session <button class="btn" id="resetStats" style="margin-left:auto;padding:3px 10px;font-size:12px">Reset</button></h2>
+      <div class="kpis">
+        <div class="kpi"><span>Viewers</span><b id="kView">0</b></div>
+        <div class="kpi"><span>Peak</span><b id="kPeak">0</b></div>
+        <div class="kpi"><span>Coins</span><b id="kCoins">0</b></div>
+        <div class="kpi"><span>Gifts</span><b id="kGifts">0</b></div>
+        <div class="kpi"><span>Likes</span><b id="kLikes">0</b></div>
+        <div class="kpi"><span>Follows</span><b id="kFollows">0</b></div>
+      </div>
+    </div>
+    <div class="card"><h2>Top gifters</h2><ol class="list" id="topList"></ol></div>
+    <div class="card"><h2>Recent gifts</h2><ul class="list" id="giftLog"></ul></div>
+    <div class="card"><h2>Clip plays</h2><ul class="list" id="playList"></ul></div>
+  </section>
+
+  <!-- settings -->
+  <section id="settings" class="card">
+    <h2>Settings <span class="hint">changes apply to the live overlay when you press Save</span></h2>
+    <div class="tabs" id="tabs"></div>
+    <div class="pane" data-tab="Idle moments">
+      <p style="color:var(--muted);margin-bottom:10px">How often each idle moment plays in each mood. Numbers are weights; the gold % is the real chance. 0 = never.</p>
+      <table id="tIdle"></table>
+    </div>
+    <div class="pane" data-tab="Sleep & moods">
+      <div id="fSleep"></div>
+    </div>
+    <div class="pane" data-tab="Surprises">
+      <div id="fSurprise"></div>
+      <table id="tSurprise" style="margin-top:12px"></table>
+    </div>
+    <div class="pane" data-tab="Gifts">
+      <p style="color:var(--muted);margin-bottom:10px">Value = approximate coin price, only used to order the queue (costlier first); never shown on stream. Gift name must match TikTok exactly (spaces and capitals don't matter). Add other spellings as aliases. “Big” gifts jump the queue with a gold flash.</p>
+      <table id="tGifts"></table>
+    </div>
+    <div class="pane" data-tab="Likes & sound">
+      <div id="fLikes"></div>
+    </div>
+    <div class="pane" data-tab="Help">
+      <details open><summary>Going live, step by step</summary>
+        <ol><li>Double-click <b>Start Zuri.bat</b> in the tiktok-live folder (keep its window open).</li>
+        <li>This Control Room opens. Check the three pills at the top are green.</li>
+        <li>In TikTok LIVE Studio, the Link source points at <b>http://localhost:7777/live.html</b>, size 1080×1920, audio ON.</li>
+        <li>Go live. The TikTok pill turns green within ~15 seconds.</li></ol></details>
+      <details><summary>What the pills mean</summary>
+        <p>TikTok: connected to your LIVE (grey = test mode / not live yet). Overlay: LIVE Studio's page is running and its size (should be 1080×1920). Sound: the overlay is allowed to play sound.</p></details>
+      <details><summary>If something looks wrong</summary>
+        <p>Overlay pill red → in LIVE Studio, right-click the Link source → Refresh. “2 overlays” warning → close extra browser tabs showing live.html. Sound blocked → enable audio on the Link source.</p></details>
+    </div>
+    <div class="savebar">
+      <button class="btn gold" id="save">Save settings</button>
+      <button class="btn" id="revert">Revert</button>
+      <span id="dirty">Unsaved changes</span>
+    </div>
+  </section>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const post = (url, body) => fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+let toastT; const toast = (t) => { $('toast').textContent = t; $('toast').classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => $('toast').classList.remove('on'), 2200); };
+const fmtDur = (s) => { s = Math.max(0, Math.round(s)); return `${Math.floor(s / 3600)}:${String(Math.floor(s / 60) % 60).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`; };
+const ago = (t) => { const s = Math.round((Date.now() - t) / 1000); return s < 60 ? `${s}s ago` : `${Math.round(s / 60)}m ago`; };
+
+// ---------- firing events ----------
+const first = ['maria', 'leo', 'juan', 'ken', 'anne', 'noah', 'xia', 'rj', 'mika', 'sofia', 'lucas', 'yuki', 'dani', 'zara', 'omar'];
+const tail = ['_23', '.k', '.dc', '_gaming', '.ph', '88', '_vlogs', '.xo', '_07', '.lux', '_', '.official'];
+$('rand').onclick = () => { $('who').value = first[Math.floor(Math.random() * first.length)] + tail[Math.floor(Math.random() * tail.length)]; };
+const user = () => ({ name: $('who').value || 'tester', id: $('who').value || 'tester', pic: '' });
+const sim = (ev) => post('/sim', ev);
+document.querySelectorAll('[data-like]').forEach((b) => b.onclick = () => sim({ type: 'like', user: user(), count: +b.dataset.like }));
+$('likeRain').onclick = () => sim({ type: 'like', user: user(), count: settings?.likesForRainwatch || 300 });
+$('psps').onclick = () => sim({ type: 'chat', user: user(), text: 'pspsps' });
+$('join').onclick = () => sim({ type: 'join', user: user() });
+$('follow').onclick = () => sim({ type: 'follow', user: user() });
+$('share').onclick = () => sim({ type: 'share', user: user() });
+const cmd = (c) => post('/api/command', c).then(() => toast('Sent: ' + c.type + (c.clip ? ' ' + c.clip : '')));
+$('cSleep').onclick = () => cmd({ type: 'sleep' });
+$('cWake').onclick = () => cmd({ type: 'wake' });
+$('cSurprise').onclick = () => cmd({ type: 'surprise' });
+$('cReload').onclick = () => cmd({ type: 'reload' });
+$('cReset').onclick = () => confirm('Clear affection and favorite human on the overlay?') && cmd({ type: 'reset' });
+$('resetStats').onclick = () => confirm('Reset this session’s stats?') && post('/api/stats/reset', {}).then(poll);
+
+function buildGiftButtons() {
+  $('giftBtns').innerHTML = settings.gifts.map((g, i) =>
+    `<button class="btn gift${g.big ? ' big' : ''}" data-i="${i}"><span class="ic">${g.icon || '🎁'}</span><span>${esc(g.gift)}<small>${esc(g.clip)}${g.big ? ' · big' : ''}</small></span></button>`).join('') +
+    `<button class="btn gift" data-i="-1"><span class="ic">🎁</span><span>Unknown gift<small>tests the fallback</small></span></button>`;
+  $('giftBtns').querySelectorAll('button').forEach((b) => b.onclick = () => {
+    const g = settings.gifts[+b.dataset.i];
+    sim({ type: 'gift', user: user(), gift: g ? g.gift : 'Some Unmapped Gift', count: +$('combo').value || 1, coins: g?.value || 1 });
+    toast(`${user().name} sent ${g ? g.gift : 'an unknown gift'}`);
+  });
+}
+async function buildClipButtons() {
+  const clips = await (await fetch('/api/clips')).json();
+  $('clipBtns').innerHTML = clips.map((c) => `<button class="btn chip" data-c="${esc(c.name)}" title="${c.mb} MB${c.hd ? ' · 1080p ready' : ' · 720p only'}">${esc(c.name)}${c.hd ? '' : ' ⚠'}</button>`).join('');
+  $('clipBtns').querySelectorAll('button').forEach((b) => b.onclick = () => cmd({ type: 'force', clip: b.dataset.c }));
+}
+
+// ---------- live state ----------
+let lastState = null, lastStateAt = 0;
+const mmss = (t) => { t = Math.max(0, Math.round(t)); return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`; };
+const names = (w) => !w?.length ? '' : w.length === 1 ? w[0] : `${w[0]} & ${w.length - 1} other${w.length > 2 ? 's' : ''}`;
+function showState(st) { lastState = st; lastStateAt = Date.now(); drawDirector(); }
+// Redrawn 4 times a second from the last report, so the countdowns tick smoothly between reports.
+function drawDirector() {
+  const st = lastState; if (!st) return;
+  const age = (Date.now() - lastStateAt) / 1000, left = Math.max(0, st.dur - st.at - age);
+  const n = st.now;
+  $('dIc').textContent = n?.icon || (st.mode === 'sleep' ? '😴' : n?.kind === 'surprise' ? '✦' : '🐾');
+  $('dTitle').textContent = n?.gift ? `${n.gift}${n.count > 1 ? ' ×' + n.count : ''}`
+    : n?.kind === 'surprise' ? `Surprise: ${st.clip}` : n?.kind === 'force' ? `Control Room: ${st.clip}`
+    : `${st.clip || '–'}${st.mode ? ' · ' + st.mode : ' · idle'}`;
+  $('dSub').textContent = n?.who ? 'from ' + names(n.who) : `clip “${st.clip}”`;
+  $('nBar').style.width = st.dur ? Math.min(100, (st.at + age) / st.dur * 100) + '%' : '0';
+  $('dLeft').textContent = st.dur ? mmss(left) : '';
+  $('dQueue').innerHTML = st.queue?.length ? st.queue.map((q) => `<li class="${q.kind === 'gift' ? '' : 'free'}"><span class="qi">${q.icon || (q.kind === 'surprise' ? '✦' : q.kind === 'force' ? '🎬' : '🐾')}</span>
+      <span class="qn"><b>${esc(q.gift ? q.gift + (q.count > 1 ? ' ×' + q.count : '') : q.clip)}</b><small>${q.who ? esc(names(q.who)) + (q.merged ? ` · ${q.merged + 1} gifts merged` : '') + ` · value ${q.value}` : esc(q.kind)}</small></span>
+      <span class="eta">${mmss(q.eta - age)}<small>until it plays</small></span></li>`).join('')
+    : '<li class="empty">Nothing waiting. She plays her idle moments.</li>';
+  $('nNext').textContent = st.queue?.length ? '(after the queue)' : st.next || '–';
+  $('nMood').textContent = `${st.label || st.mood}${st.mode ? ' (mode)' : ''} · affection ${st.love}%`;
+  $('nSleep').textContent = st.mode === 'sleep' ? 'asleep. A gift, pspsps, follow or like burst wakes her'
+    : st.sleepAfter ? `quiet for ${Math.round(st.idleFor + age)}s · falls asleep at ${st.sleepAfter}s` : 'off';
+  $('nSurprise').textContent = st.nextSurpriseIn == null ? 'off' : st.mode ? 'paused while asleep' : `next in ~${mmss(st.nextSurpriseIn - age)}`;
+}
+setInterval(drawDirector, 250);
+function connect() {
+  const ws = new WebSocket(`ws://${location.host}`);
+  ws.onopen = () => ws.send(JSON.stringify({ type: 'hello', role: 'studio', page: 'studio', w: innerWidth, h: innerHeight, dpr: devicePixelRatio, ua: 'Control Room' }));
+  ws.onmessage = (m) => { const ev = JSON.parse(m.data); if (ev.type === 'state') showState(ev.state); if (ev.type === 'status') setTik(ev.text); if (ev.type === 'net') drawNet(ev.net); };
+  ws.onclose = () => setTimeout(connect, 2000);
+}
+function setTik(t) {
+  $('sTik').textContent = t.length > 48 ? t.slice(0, 48) + '…' : t; $('sTik').title = t;
+  $('dTik').className = 'dot ' + (/^connected/.test(t) ? 'good' : /test mode/.test(t) ? '' : 'warn');
+}
+
+async function poll() {
+  let s; try { s = await (await fetch('/api/stats')).json(); } catch { $('dOv').className = 'dot bad'; $('sOv').textContent = 'Server offline'; return; }
+  setTik(s.status);
+  $('uptime').textContent = 'Session ' + fmtDur((s.now - s.since) / 1000);
+  const fresh = s.overlayStateAt && s.now - s.overlayStateAt < 5000;
+  const ov = s.overlays[0];
+  $('dOv').className = 'dot ' + (!fresh ? 'bad' : ov && (ov.w < 1000 || ov.h < 1800) ? 'warn' : 'good');
+  $('sOv').textContent = !fresh ? 'Overlay not running' : `Overlay ${ov ? ov.w + '×' + ov.h : ''}${s.overlays.length > 1 ? ` · ${s.overlays.length} open!` : ''}`;
+  const st = s.overlayState;
+  $('dSnd').className = 'dot ' + (!fresh ? '' : st?.audio ? 'good' : 'bad');
+  $('sSnd').textContent = !fresh ? 'Sound –' : st?.audio ? 'Sound on' : 'Sound BLOCKED';
+  if (fresh && st && Date.now() - lastStateAt > 3000) showState(st);
+  $('kView').textContent = s.viewers; $('kPeak').textContent = s.peakViewers; $('kCoins').textContent = s.coins.toLocaleString();
+  $('kGifts').textContent = s.gifts; $('kLikes').textContent = s.likes.toLocaleString(); $('kFollows').textContent = s.follows;
+  const tops = Object.values(s.gifters).sort((a, b) => b.coins - a.coins).slice(0, 10);
+  $('topList').innerHTML = tops.length ? tops.map((g, i) => `<li><span>${i + 1}. ${esc(g.name)}</span><span class="t">${g.coins} coins · ${g.gifts} gifts</span></li>`).join('') : '<li><span style="color:var(--muted)">No gifts yet</span></li>';
+  $('giftLog').innerHTML = s.recentGifts.length ? s.recentGifts.map((g) => `<li><span>${esc(g.who)} → <b>${esc(g.gift)}</b>${g.count > 1 ? ' ×' + g.count : ''}${g.test ? '<span class="test">test</span>' : ''}</span><span class="t">${ago(g.at)}</span></li>`).join('') : '<li><span style="color:var(--muted)">Nothing yet</span></li>';
+  const plays = Object.entries(s.clipPlays).sort((a, b) => b[1] - a[1]);
+  $('playList').innerHTML = plays.map(([c, n]) => `<li><span>${esc(c)}</span><span class="t">${n}×</span></li>`).join('') || '<li><span style="color:var(--muted)">–</span></li>';
+  // Warnings worth acting on
+  const w = [];
+  if (fresh && ov && (ov.w < 1000 || ov.h < 1800)) w.push(`LIVE Studio renders the overlay at ${ov.w}×${ov.h}. Set the Link source to 1080×1920 or it looks blurry.`);
+  if (s.overlays.length > 1) w.push(`${s.overlays.length} copies of the overlay are open. Close extra browser tabs showing live.html (each one plays its own clips).`);
+  if (fresh && st && !st.audio) w.push('The overlay is not allowed to play sound. In LIVE Studio, turn audio ON for the Link source.');
+  const um = Object.entries(s.unmatchedGifts);
+  if (um.length) w.push('Gifts with no reaction mapped: ' + um.map(([n, c]) => `<b>${esc(n)}</b> (${c}×)`).join(', ') + '. Add one as an alias in Settings → Gifts if it was meant for a clip.');
+  $('warns').innerHTML = w.map((x) => '⚠ ' + x).join('<br>'); $('warns').classList.toggle('on', w.length > 0);
+}
+
+// ---------- settings editor ----------
+let settings = null, dirty = false;
+const markDirty = () => { dirty = true; $('dirty').classList.add('on'); };
+const tabsNames = [...document.querySelectorAll('.pane')].map((p) => p.dataset.tab);
+$('tabs').innerHTML = tabsNames.map((t, i) => `<button class="tab${i ? '' : ' on'}" data-t="${t}">${t}</button>`).join('');
+document.querySelector('.pane').classList.add('on');
+$('tabs').querySelectorAll('.tab').forEach((b) => b.onclick = () => {
+  $('tabs').querySelectorAll('.tab').forEach((x) => x.classList.toggle('on', x === b));
+  document.querySelectorAll('.pane').forEach((p) => p.classList.toggle('on', p.dataset.tab === b.dataset.t));
+});
+// A numeric field bound to a path inside the settings object.
+const getP = (o, path) => path.split('.').reduce((a, k) => a?.[k], o);
+const setP = (o, path, v) => { const ks = path.split('.'); const last = ks.pop(); ks.reduce((a, k) => (a[k] ??= {}), o)[last] = v; };
+function field(path, label, help, { min = 0, max = 100, step = 1, unit = '' } = {}) {
+  const v = getP(settings, path) ?? 0;
+  return `<div class="field"><label>${label}</label><input type="range" min="${min}" max="${max}" step="${step}" value="${v}" data-p="${path}">
+    <span><input type="number" min="${min}" max="${max}" step="${step}" value="${v}" data-p="${path}"> ${unit}</span>${help ? `<div class="help">${help}</div>` : ''}</div>`;
+}
+function bindFields(root) {
+  root.querySelectorAll('input[data-p]').forEach((inp) => inp.oninput = () => {
+    const v = inp.type === 'checkbox' ? inp.checked : +inp.value;
+    setP(settings, inp.dataset.p, v);
+    root.querySelectorAll(`input[data-p="${inp.dataset.p}"]`).forEach((o) => { if (o !== inp && o.type !== 'checkbox') o.value = v; });
+    markDirty(); if (inp.dataset.p.includes('weights') || inp.dataset.p.includes('pool')) renderPcts();
+  });
+}
+function renderIdle() {
+  const moods = Object.keys(settings.moods), moments = Object.keys(settings.moments);
+  $('tIdle').innerHTML = `<tr><th>Moment</th>${moods.map((m) => `<th>${esc(settings.moods[m].label)}</th>`).join('')}</tr>` +
+    moments.map((c) => `<tr><td>${esc(c)}</td>${moods.map((m) => `<td><input type="number" min="0" max="10" step="0.5" value="${settings.moods[m].weights[c] ?? settings.moments[c].weight}" data-p="moods.${m}.weights.${c}" style="width:64px"><span class="pct" data-pct="${m}.${c}"></span></td>`).join('')}</tr>`).join('');
+  bindFields($('tIdle'));
+}
+function renderPcts() {
+  for (const m of Object.keys(settings.moods)) {
+    const w = settings.moods[m].weights, tot = Object.keys(settings.moments).reduce((t, c) => t + (w[c] ?? settings.moments[c].weight), 0);
+    for (const c of Object.keys(settings.moments)) { const el = document.querySelector(`[data-pct="${m}.${c}"]`); if (el) el.textContent = tot ? Math.round((w[c] ?? settings.moments[c].weight) / tot * 100) + '%' : '0%'; }
+  }
+  const pool = settings.surprises?.pool || {}, tot = Object.values(pool).reduce((t, x) => t + x.weight, 0);
+  for (const c of Object.keys(pool)) { const el = document.querySelector(`[data-spct="${c}"]`); if (el) el.textContent = tot ? Math.round(pool[c].weight / tot * 100) + '%' : '0%'; }
+}
+function renderSleep() {
+  const m = settings.moods;
+  $('fSleep').innerHTML =
+    field('modes.sleep.afterSeconds', 'Falls asleep after', 'Seconds with no likes, chats or gifts before she curls up. Joins and surprises don’t count.', { min: 20, max: 900, step: 5, unit: 's' }) +
+    field('excitement.giftSeconds', 'Delighted after a gift for', '', { min: 10, max: 300, step: 5, unit: 's' }) +
+    ['bored', 'sleepy', 'ignored'].filter((k) => m[k]).map((k) => field(`moods.${k}.afterSeconds`, `“${m[k].label}” after`, `Seconds since the last gift (only shows while she’s awake).`, { min: 30, max: 1800, step: 10, unit: 's' })).join('');
+  bindFields($('fSleep'));
+}
+function renderSurprise() {
+  const sp = settings.surprises;
+  $('fSurprise').innerHTML =
+    `<div class="field"><label>Surprises on</label><input type="checkbox" ${sp.enabled ? 'checked' : ''} data-p="surprises.enabled" style="width:auto;justify-self:start"><span></span>
+      <div class="help">Now and then (only while she’s awake and nothing is queued) she does a special moment on her own, shown as “${esc(sp.title)}”. Never shown as a viewer’s gift.</div></div>` +
+    field('surprises.everyMinutes.0', 'At least every', '', { min: 1, max: 30, step: 0.5, unit: 'min' }) +
+    field('surprises.everyMinutes.1', 'At most every', '', { min: 1, max: 60, step: 0.5, unit: 'min' }) +
+    field('surprises.quietAfterGiftSeconds', 'Not within … of a real gift', 'So a surprise never steals a gifter’s moment.', { min: 0, max: 300, step: 5, unit: 's' });
+  $('tSurprise').innerHTML = `<tr><th>Moment</th><th>Weight</th><th>Cooldown</th><th>Line on screen</th></tr>` +
+    Object.entries(sp.pool).map(([c, x]) => `<tr><td>${esc(c)}</td><td><input type="number" min="0" max="20" step="0.1" value="${x.weight}" data-p="surprises.pool.${c}.weight" style="width:70px"><span class="pct" data-spct="${c}"></span></td>
+      <td><input type="number" min="0" max="600" step="1" value="${x.cooldownMinutes}" data-p="surprises.pool.${c}.cooldownMinutes" style="width:70px"> min</td><td>${esc(x.line)}</td></tr>`).join('');
+  bindFields($('fSurprise')); bindFields($('tSurprise'));
+  // the checkbox stores a boolean
+  $('fSurprise').querySelector('input[type=checkbox]').onchange = (e) => { settings.surprises.enabled = e.target.checked; markDirty(); };
+}
+async function renderGifts() {
+  const clips = (await (await fetch('/api/clips')).json()).map((c) => c.name);
+  $('tGifts').innerHTML = `<tr><th></th><th>TikTok gift name</th><th>Plays clip</th><th>Big</th><th>Value</th><th>Aliases (comma separated)</th><th>Card text</th></tr>` +
+    settings.gifts.map((g, i) => `<tr><td style="font-size:20px">${g.icon || ''}</td><td><input type="text" value="${esc(g.gift)}" data-g="${i}" data-k="gift" style="width:150px"></td>
+      <td><select data-g="${i}" data-k="clip">${clips.map((c) => `<option ${c === g.clip ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select></td>
+      <td><input type="checkbox" ${g.big ? 'checked' : ''} data-g="${i}" data-k="big"></td>
+      <td><input type="number" min="0" value="${g.value ?? 1}" data-g="${i}" data-k="value" style="width:70px" title="approximate coins; orders the queue"></td>
+      <td><input type="text" value="${esc((g.aliases || []).join(', '))}" data-g="${i}" data-k="aliases" style="width:180px"></td>
+      <td><input type="text" value="${esc(g.action)}" data-g="${i}" data-k="action" style="width:190px"></td></tr>`).join('');
+  $('tGifts').querySelectorAll('[data-g]').forEach((el) => el.onchange = el.oninput = () => {
+    const g = settings.gifts[+el.dataset.g], k = el.dataset.k;
+    g[k] = k === 'big' ? el.checked : k === 'value' ? +el.value : k === 'aliases' ? el.value.split(',').map((x) => x.trim()).filter(Boolean) : el.value;
+    markDirty();
+  });
+}
+function renderLikes() {
+  $('fLikes').innerHTML =
+    field('likesForBlink', 'Slow blink every', 'Likes (taps) between slow blinks.', { min: 10, max: 500, step: 5, unit: 'likes' }) +
+    field('likesForRainwatch', 'Window milestone every', 'Likes between her trips to the window.', { min: 50, max: 3000, step: 50, unit: 'likes' }) +
+    field('lookCooldownSeconds', '“pspsps” cooldown', '', { min: 5, max: 120, step: 1, unit: 's' }) +
+    field('joinLookCooldownSeconds', 'Look at new viewers at most every', '', { min: 10, max: 300, step: 5, unit: 's' }) +
+    field('queue.maxPendingGifts', 'Max gifts waiting', 'Beyond this, the cheapest waiting gifts are thanked on screen instead of each playing.', { min: 2, max: 20, step: 1, unit: 'gifts' }) +
+    field('queue.ageBonusPerSecond', 'Waiting bonus', 'Priority a waiting gift gains per second, so cheap gifts still get their turn.', { min: 0, max: 5, step: 0.1, unit: 'per s' }) +
+    field('queue.quietAfterSeconds', 'Gift card glows after', 'Seconds of no interaction before the gift card steps forward.', { min: 5, max: 300, step: 5, unit: 's' }) +
+    field('audio.musicVolume', 'Lo-fi music volume', '', { min: 0, max: 1, step: 0.05 }) +
+    field('audio.quietMusicVolume', 'Music while asleep', '', { min: 0, max: 1, step: 0.05 }) +
+    field('audio.clipVolume', 'Clip sound volume (rain, cat)', '', { min: 0, max: 1, step: 0.05 });
+  bindFields($('fLikes'));
+}
+async function loadSettings() {
+  settings = await (await fetch('/api/settings')).json();
+  dirty = false; $('dirty').classList.remove('on');
+  renderIdle(); renderSleep(); renderSurprise(); await renderGifts(); renderLikes(); renderPcts(); buildGiftButtons();
+}
+$('save').onclick = async () => {
+  const [a, b] = settings.surprises.everyMinutes; if (a > b) settings.surprises.everyMinutes = [b, a];
+  const r = await post('/api/settings', settings);
+  if (r.ok) { toast('Saved. The overlay picked it up.'); await loadSettings(); } else toast('Could not save: ' + (await r.text()));
+};
+$('revert').onclick = () => loadSettings().then(() => toast('Reverted'));
+addEventListener('beforeunload', (e) => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+
+// ---------- network ----------
+function drawNet(n) {
+  if (!n) return;
+  const label = { go: '● Good to go live', caution: '● Go live with care', nogo: '● Not ready to go live', unknown: 'Checking your connection…' }[n.verdict];
+  $('nVerdict').className = 'verdict ' + (n.testing && !n.test ? '' : n.verdict);
+  $('nVerdict').textContent = n.testing ? (n.test ? label + ' · re-testing…' : 'Testing your connection…') : label;
+  $('nNote').textContent = n.note;
+  $('nRec').innerHTML = n.advice ? `Set LIVE Studio to <b>${n.advice.res}</b> · <b>${n.advice.fps} fps</b> · bitrate <b>${n.advice.kbps.toLocaleString()} kbps</b>` : '';
+  $('nUp').textContent = n.test ? n.test.up.toFixed(1) : '–';
+  $('nDown').textContent = n.test ? n.test.down.toFixed(1) : '–';
+  $('nPing').textContent = n.ping != null ? n.ping : n.test?.ping ?? '–';
+  $('nSend').textContent = n.sendingNow.toFixed(2);
+  $('netHint').textContent = n.live ? 'LIVE: watching usage only' : 'not live: auto speed test every 5 min';
+  $('nTest').disabled = n.live || n.testing;
+  $('nTest').title = n.live ? 'Disabled while live: a speed test would slow your stream' : '';
+  $('nWhen').textContent = n.test ? ` tested ${ago(n.test.at)}${n.nextTestIn != null ? ` · next in ${Math.ceil(n.nextTestIn / 60)} min` : ''}` : '';
+  $('dNet').className = 'dot ' + ({ go: 'good', caution: 'warn', nogo: 'bad' }[n.verdict] || '');
+  $('sNet').textContent = n.test ? `Network ${n.verdict === 'go' ? 'GO' : n.verdict === 'caution' ? 'tight' : n.verdict === 'nogo' ? 'NO-GO' : ''} · ${n.test.up.toFixed(1)} Mbps up` : 'Network…';
+  // Graph: what the PC is sending (gold) against the measured upload capacity (dashed).
+  const pts = n.usage.slice(-100), cap = n.test?.up || 0, top = Math.max(cap * 1.15, ...pts.map((p) => p.up), 0.5);
+  const xy = pts.map((p, i) => `${(i / Math.max(1, pts.length - 1) * 300).toFixed(1)},${(70 - p.up / top * 66).toFixed(1)}`).join(' ');
+  const capY = (70 - cap / top * 66).toFixed(1);
+  $('nGraph').innerHTML = (cap ? `<line x1="0" x2="300" y1="${capY}" y2="${capY}" stroke="rgba(217,180,111,.55)" stroke-dasharray="4 4"/><text x="296" y="${Math.max(10, capY - 4)}" fill="#a99f90" font-size="10" text-anchor="end">line ${cap.toFixed(1)} Mbps</text>` : '') +
+    (pts.length > 1 ? `<polyline points="${xy}" fill="none" stroke="#d9b46f" stroke-width="2"/>` : '');
+}
+$('nTest').onclick = async () => { $('nTest').disabled = true; const r = await post('/api/net/test', {}); if (!r.ok) toast((await r.json()).error); };
+const pollNet = async () => { try { drawNet(await (await fetch('/api/net')).json()); } catch {} };
+
+loadSettings(); buildClipButtons(); connect(); poll(); setInterval(poll, 2000); pollNet(); setInterval(pollNet, 3000);
+</script>
+</body>
+</html>

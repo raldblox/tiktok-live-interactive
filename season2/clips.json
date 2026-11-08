@@ -1,0 +1,134 @@
+{
+  "model": "seedance2_5",
+  "anchor": "season2/anchor.jpg",
+  "outDir": "season2/videos",
+  "audio": true,
+  "ratios": {
+    "480p": "480:854",
+    "720p": "720:1280",
+    "1080p": "1080:1920"
+  },
+  "creditsPerSecond": {
+    "480p": 20,
+    "720p": 30,
+    "1080p": 68
+  },
+  "minCredits": 80,
+  "world": "Outside the big window, heavy rain is clearly in motion in every frame: fast streaks fall from the top of the window to the bottom, constantly, at the same density and speed for the entire clip, against the blurred city lights; the pane is clean and dry on the room side. Sound: a steady muffled rain hiss through the glass at the same level all clip, plus the cat's natural sounds. No music, no voices.",
+  "style": "Real footage, static locked-off camera, no zoom, no pan, no cuts. The same Savannah cat and the same room throughout, natural real-cat motion, photorealistic.",
+  "clips": {
+    "blink": {
+      "seconds": 5,
+      "prompt": "Zuri, the spotted Savannah cat, sits on the cushion of her ZURI throne bed facing the camera, breathing softly. She gives two slow, loving blinks at the camera, one large ear flicks toward a sound, the black tip of her tail curls. A soft purr. She ends in exactly the same pose she started in."
+    },
+    "pawwash": {
+      "seconds": 7,
+      "prompt": "Zuri, the spotted Savannah cat, lifts her right front paw, licks it with small realistic tongue strokes, then wipes it over her cheek and behind her large ear twice, with gentle licking sounds. She puts the paw down, gives a little head shake that makes her ears flick, and settles into exactly the same sitting pose she started in on her throne bed."
+    },
+    "chat": {
+      "seconds": 9,
+      "prompt": "Zuri, the spotted Savannah cat, hops down from her throne bed and walks straight toward the camera across the rug until she is close to the lens, her face and chest large in the lower part of the frame. She sits and reads messages on the screen: her eyes scan from side to side, she tilts her head to one side, then the other, her large ears swivel, and she gives a short curious chirp. Then she turns, walks back, hops onto her throne bed and sits exactly as she started, facing the camera.",
+      "world": "Heavy rain falls outside the window the whole time, clearly in motion. Sound: soft paw steps, a curious chirp, the muffled rain. No music, no voices."
+    },
+    "rainwatch": {
+      "seconds": 10,
+      "prompt": "Zuri, the spotted Savannah cat, hops down from her throne bed, trots across the rug to the right, climbs the walnut steps onto the cushioned window perch and sits facing the window, her back to the camera. Her head follows the falling rain outside, her tail sways slowly and she gives a happy chirp. Then she turns, climbs back down the steps, trots back and sits on her throne bed in exactly the pose she started in, facing the camera."
+    },
+    "mirror": {
+      "seconds": 10,
+      "prompt": "Zuri, the spotted Savannah cat, hops down from her throne bed, walks to the walnut cabinet on the left and jumps lightly onto it, stepping carefully past the pink display and orchid without touching them. She looks at her reflection in the mirror, tilts her head, taps the mirror once with one paw and gives a pleased trill. She jumps down, struts back and sits on her throne bed in exactly the pose she started in, facing the camera."
+    },
+    "rose": {
+      "seconds": 6,
+      "prompt": "A man's hand reaches in from the bottom right edge of the frame holding one long-stemmed red rose toward Zuri, the spotted Savannah cat on her throne bed. She sniffs the rose petals delicately, then rubs her cheek along the rose lovingly with a soft purr. The hand pulls the rose back out of the bottom right edge of the frame and is gone. She settles into exactly the same sitting pose she started in."
+    },
+    "overreact": {
+      "seconds": 7,
+      "prompt": "Zuri, the spotted Savannah cat, suddenly looks shocked: her eyes go wide, her large ears go back and her mouth opens. She dramatically flops over onto her side on the cushion of her throne bed with her legs out, lies still, peeks at the camera with one eye open, then gets up looking offended, gives a short indignant meow and sits back in exactly the pose she started in, facing the camera."
+    },
+    "cloak": {
+      "seconds": 8,
+      "prompt": "Zuri, the Savannah cat on her throne bed, turns to look at the pink display on the left cabinet. It ripples like heat haze, glitches once and turns invisible, cloaked, leaving a faint see-through shimmer outline. Zuri startles, ears back, eyes wide, then glances at the camera, puzzled. Behind her the display shimmers back exactly as before. She looks again, huffs suspiciously and sits as she started. Sound: a soft electric shimmer."
+    },
+    "awaken": {
+      "seconds": 10,
+      "prompt": "Film VFX shot. Zuri, the Savannah cat, sits on her throne bed. The room lights dim, the brass lamp flickers, a low hum builds. She slowly lifts her head and her eyes ignite molten gold. Behind her, nine translucent tails of golden spirit-fire unfurl one by one into a regal fan, casting warm moving light and long shadows across the walls, rug and furniture; embers drift up and her fur ripples in an unseen wind. She holds the pose, majestic. Then the nine tails fold back into her one real ringed tail, the glow fades, the lights return and she sits exactly as she started.",
+      "world": "Heavy rain keeps falling outside the window the whole time, clearly in motion. Sound: a deep rising hum, a soft whoosh for each tail, a resonant chime at the peak, then only the rain. No music, no voices.",
+      "style": "Static locked-off camera, no cuts. Photorealistic cinema VFX, volumetric light, the same cat and room."
+    },
+    "galaxy": {
+      "seconds": 15,
+      "prompt": "Epic film VFX shot. Zuri, the Savannah cat on her throne bed, looks up. The room breaks into glowing particles and folds away, revealing deep space with a vast spiral galaxy and violet nebulae. She floats up weightless and her nine golden spirit-fire tails ignite behind her, eyes blazing gold. She leaps through space, swats a passing comet with one paw and it bursts into a shower of stars. She spins, and a ring of golden energy pulses out from her, the galaxy flares brighter and planets align around her inside a shifting lattice of light. Then the cosmos folds back into the room, her tails fade into one, and she lands on her cushion and sits exactly as she started.",
+      "world": "Before and after, heavy rain falls outside the window, clearly in motion. Sound: deep cosmic drone, whooshes, a starburst crackle, a booming energy pulse, then the rain. No music, no voices.",
+      "style": "Static camera, no cuts. Photorealistic cinema VFX, the same cat and room."
+    },
+    "sleep-in": {
+      "seconds": 5,
+      "last": "season2/sleep-key.jpg",
+      "prompt": "One continuous, unhurried movement with every moment visible: Zuri, the spotted Savannah cat on her throne bed, gives a big slow yawn, slowly lowers herself onto the cushion, gently curls her body around into a ball with her chin settling onto her front paws, wraps her ringed tail around herself and slowly closes her eyes. Smooth, gradual, natural real-cat motion. Soft yawn and a contented sigh."
+    },
+    "sleep-loop": {
+      "seconds": 10,
+      "first": "season2/sleep-key.jpg",
+      "last": "season2/sleep-key.jpg",
+      "prompt": "Zuri, the spotted Savannah cat, sleeps peacefully curled up on her throne bed. Her body rises and falls with slow breathing, one ear twitches, the black tip of her tail flicks once, a front paw twitches softly as she dreams. Her eyes stay closed the whole time. Soft sleepy purring."
+    },
+    "sleep-out": {
+      "seconds": 4,
+      "first": "season2/sleep-key.jpg",
+      "prompt": "Zuri, the spotted Savannah cat curled asleep on her throne bed, suddenly opens her eyes, lifts her head, quickly stretches her front legs and sits up straight facing the camera, alert, in exactly the anchor pose. A short chirp."
+    },
+    "play-in": {
+      "seconds": 5,
+      "last": "season2/play-key.jpg",
+      "prompt": "Zuri, the spotted Savannah cat on her throne bed, notices a shimmering patch of rain-rippled light dancing on the rug. Her ears go forward, she hops down from the bed and drops into a low playful hunting crouch on the rug in front of the bed, eyes locked on the light. Soft paw thumps."
+    },
+    "play-loop": {
+      "seconds": 10,
+      "first": "season2/play-key.jpg",
+      "last": "season2/play-key.jpg",
+      "prompt": "Zuri, the spotted Savannah cat, plays alone on the rug: she wiggles her rear and pounces at the shimmering patch of rain-rippled light, it slips away across the rug, she chases and swats at it, rolls onto her side batting at it, then springs back into the same low hunting crouch, eyes locked on the light. Playful chirps and soft thumps."
+    },
+    "play-out": {
+      "seconds": 4,
+      "first": "season2/play-key.jpg",
+      "prompt": "Zuri, the spotted Savannah cat crouched on the rug, quickly loses interest in the light, trots straight back, hops onto her throne bed and sits facing the camera in exactly the anchor pose. Soft paw thumps."
+    },
+    "lightning": {
+      "seconds": 8,
+      "prompt": "Film VFX shot. Outside the window a massive lightning bolt strikes the city skyline; the whole room flashes blinding blue-white, then plunges into near darkness lit only by the amber neon sign. Zuri, the spotted Savannah cat on her throne bed, jolts, her fur puffs up with static, tiny blue electric sparks crackle along her whiskers and ear tips, and her eyes glow for a moment. The brass lamp flickers back on, the warm light returns, she shakes out her fur and sits exactly as she started.",
+      "world": "Heavy rain falls outside the window the whole time, clearly in motion. Sound: a huge thunderclap right after the flash, an electric crackle, a startled chirp, then the rain. No music, no voices.",
+      "style": "Static camera, no cuts. Photorealistic cinema VFX, the same cat and room."
+    },
+    "pumpkin": {
+      "seconds": 10,
+      "prompt": "Film VFX shot, Halloween. A small glowing carved jack-o'-lantern, about the size of a cat's head, rolls in from the left edge of the frame across the rug and stops in front of Zuri's throne bed. Its carved face flickers alive with orange firelight and grins. Zuri, the spotted Savannah cat, stays on all four paws on her cushion and arches her back high in the classic Halloween-cat pose: fur puffed up, tail bristled straight up, ears flat, and she hisses. The pumpkin bursts into a swirling swarm of small black bats in a puff of orange embers; the bats flap out of the top of the frame. She relaxes, smooths her fur and sits exactly as she started.",
+      "world": "Heavy rain falls outside the window the whole time, clearly in motion. Sound: a pumpkin rolling, crackling fire, her hiss, a flurry of bat wings, then the rain. No music, no voices.",
+      "style": "Static camera, no cuts. Photorealistic cinema VFX, real cat anatomy, the same cat and room."
+    },
+    "witchy": {
+      "seconds": 12,
+      "prompt": "Film VFX shot, Halloween magic. A swirl of violet smoke and glowing green sparks wraps around Zuri, the spotted Savannah cat on her throne bed. When it clears she wears a small black velvet witch hat and a tiny broomstick floats beside her. She hops onto the broom and soars around the room in a graceful loop, trailing glittering purple sparks past the window and the climbing wall, her tail streaming. She swoops back, lands softly on her cushion, and the hat and broom vanish in a puff of violet smoke. She sits exactly as she started, looking pleased.",
+      "world": "Heavy rain falls outside the window the whole time, clearly in motion. Sound: a magical shimmer, a rush of wind as she flies, twinkling sparks, a soft puff, then the rain. No music, no voices.",
+      "style": "Static camera, no cuts. Photorealistic cinema VFX, the same cat and room."
+    },
+    "moneygun": {
+      "seconds": 10,
+      "prompt": "Film shot, boss mode. From off-screen at the right edge, a burst of crisp unbranded paper bills sprays across the room, tumbling and fluttering through the warm light; every bill keeps fluttering until it drifts out of the frame. Zuri, the spotted Savannah cat, leaps high off her throne bed and catches one bill mid-air in her mouth, lands, and trots proudly off the right edge of the frame with it. She trots back in without the bill, hops onto her throne bed and sits exactly as she started, looking smug.",
+      "world": "Heavy rain falls outside the window the whole time, clearly in motion. Sound: a whoosh of fluttering paper, a soft landing, proud paw steps, then the rain. No music, no voices.",
+      "style": "Static camera, no cuts. Photorealistic cinema VFX, the same cat and room."
+    },
+    "icecream": {
+      "seconds": 8,
+      "prompt": "A man's hand reaches in from the bottom right edge of the frame holding a pastel ice cream cone toward Zuri, the spotted Savannah cat on her throne bed. She sniffs it, gives it two quick licks, then freezes with a hilarious brain-freeze face: eyes squeezed shut, ears flat, mouth open, head shaking. The hand pulls the cone back out of the bottom right edge and is gone. She shakes her head, licks her nose and sits exactly as she started.",
+      "world": "Heavy rain falls outside the window the whole time, clearly in motion. Sound: two small licks, a funny startled little yowl, a head shake, then the rain. No music, no voices.",
+      "style": "Static camera, no cuts. Photorealistic real footage, the same cat and room."
+    },
+    "tailspirits": {
+      "seconds": 12,
+      "prompt": "Film VFX shot, whimsical magic. Zuri, the spotted Savannah cat on her throne bed, flicks her ringed tail. The black rings of her tail pop off one by one and turn into small fluffy round fur balls with tiny glowing gold eyes, like playful spirit puffballs. They bounce out across the room: hopping up the climbing wall steps, circling the brass lamp, rolling along the window perch and tumbling over the rug, while Zuri watches them with her head turning, amused. Then they all bounce back, swirl around her tail and merge into the black rings again, her tail whole. She sits exactly as she started, pleased.",
+      "world": "Heavy rain falls outside the window the whole time, clearly in motion. Sound: soft playful pops, light bouncy thuds, a shimmering chime as they merge, then the rain. No music, no voices.",
+      "style": "Static camera, no cuts. Photorealistic cinema VFX, real cat anatomy, the same cat and room."
+    }
+  }
+}

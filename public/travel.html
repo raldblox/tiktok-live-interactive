@@ -1,0 +1,650 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Lumo Travel Overlay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #f4efe6;
+    --muted: rgba(244, 239, 230, .62);
+    --faint: rgba(244, 239, 230, .38);
+    --gold: #e8c98a;
+    --gold-2: #f6e3b4;
+    --glass: rgba(16, 13, 24, .38);
+    --glass-strong: rgba(16, 13, 24, .55);
+    --line: rgba(255, 255, 255, .14);
+    --serif: "Fraunces", Georgia, serif;
+    --sans: "Manrope", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+  body { font-family: var(--sans); color: var(--ink); -webkit-font-smoothing: antialiased; }
+
+  #stage { position: absolute; width: 1080px; height: 1920px; left: 50%; top: 50%; transform-origin: center; overflow: hidden; background: #000; }
+
+  /* ---------- scenes ---------- */
+  .scene { position: absolute; inset: 0; overflow: hidden;
+    transition: transform 1.8s cubic-bezier(.6,0,.3,1), filter 1.8s ease, opacity 1.6s ease; }
+  .scene.exit { transform: scale(1.8); filter: blur(28px) brightness(1.7); opacity: 0; }
+  .scene.prep { transform: scale(.7); filter: blur(28px) brightness(1.4); opacity: 0; transition: none; }
+  .scene.active { transform: none; filter: none; opacity: 1; }
+  .scene .base { position: absolute; inset: 0; background: radial-gradient(ellipse 90% 70% at 50% 38%, var(--s0) 0%, var(--s1) 78%); }
+  .scene .orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: .55; mix-blend-mode: screen; }
+  .scene .o1 { width: 760px; height: 760px; left: -180px; top: 260px; background: var(--g1); animation: orb1 22s ease-in-out infinite; }
+  .scene .o2 { width: 680px; height: 680px; right: -220px; top: 620px; background: var(--g2); animation: orb2 26s ease-in-out infinite; }
+  .scene .o3 { width: 520px; height: 520px; left: 280px; top: 1080px; background: var(--g3); opacity: .35; animation: orb1 30s ease-in-out infinite reverse; }
+  .scene .rays { position: absolute; left: -30%; right: -30%; top: -20%; height: 120%; opacity: .16; mix-blend-mode: screen;
+    background: repeating-conic-gradient(from 200deg at 50% 0%, #fff0 0deg 4deg, #ffffff 5deg, #fff0 7deg 13deg);
+    -webkit-mask: linear-gradient(#000, transparent 70%); mask: linear-gradient(#000, transparent 70%); animation: rays 18s ease-in-out infinite; }
+  .scene .fog { position: absolute; left: -10%; right: -10%; bottom: -5%; height: 45%;
+    background: radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--g1) 35%, transparent), transparent 70%); filter: blur(20px); }
+  .scene video, .scene img.bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  @keyframes orb1 { 50% { transform: translate(120px, -80px) scale(1.15) } }
+  @keyframes orb2 { 50% { transform: translate(-140px, 60px) scale(.9) } }
+  @keyframes rays { 50% { transform: rotate(4deg); opacity: .24 } }
+
+  canvas#fx { position: absolute; inset: 0; pointer-events: none; }
+
+  /* Cinematic finish: vignette + film grain */
+  #vignette { position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 75% 60% at 50% 48%, transparent 55%, rgba(0,0,0,.65) 100%),
+                linear-gradient(rgba(0,0,0,.55), transparent 18%, transparent 75%, rgba(0,0,0,.6)); }
+  #grain { position: absolute; inset: -50%; pointer-events: none; opacity: .09; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    animation: grain .9s steps(6) infinite; }
+  @keyframes grain { 0% { transform: translate(0,0) } 20% { transform: translate(-3%,2%) } 40% { transform: translate(2%,-3%) } 60% { transform: translate(-2%,-1%) } 80% { transform: translate(3%,3%) } 100% { transform: translate(0,0) } }
+
+  #warp { position: absolute; inset: -40%; pointer-events: none; opacity: 0;
+    background: repeating-conic-gradient(from 0deg at 50% 50%, #fff0 0deg 5deg, #ffffff38 5.5deg, #fff0 6.5deg 11deg);
+    -webkit-mask: radial-gradient(circle, transparent 12%, #000 45%); mask: radial-gradient(circle, transparent 12%, #000 45%); }
+  #warp.go { animation: warp 2s cubic-bezier(.5,0,.4,1); }
+  @keyframes warp { 0% { opacity: 0; transform: scale(.6) rotate(0) } 40% { opacity: 1 } 100% { opacity: 0; transform: scale(2.4) rotate(25deg) } }
+
+  /* ---------- Lumo ---------- */
+  #lumo { position: absolute; left: 50%; top: 1110px; width: 360px; margin-left: -180px; transition: opacity .6s; }
+  #lumo.hidden { opacity: 0; }
+  #lumo .float { animation: bob 3.6s ease-in-out infinite; }
+  #lumo svg, #lumo video, #lumo img { width: 100%; display: block; overflow: visible; }
+  #lumo .eyes { transform-origin: 100px 124px; animation: blink 5.5s infinite; }
+  #lumo .bloom { animation: bloom 2.8s ease-in-out infinite; transform-origin: 114px 14px; }
+  #lumo .shadow { position: absolute; left: 22%; right: 22%; bottom: -26px; height: 30px; border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(0,0,0,.55), transparent 70%); animation: shadow 3.6s ease-in-out infinite; }
+  @keyframes bob { 50% { transform: translateY(-20px) } }
+  @keyframes shadow { 50% { transform: scale(.82); opacity: .65 } }
+  @keyframes blink { 0%, 46%, 50%, 100% { transform: scaleY(1) } 48% { transform: scaleY(.08) } }
+  @keyframes bloom { 50% { transform: scale(1.25); opacity: .75 } }
+  #lumo.leave .body { animation: leave 1.1s cubic-bezier(.5,-0.3,.7,0) forwards; }
+  #lumo.arrive .body { animation: arrive 1.2s cubic-bezier(.2,.9,.3,1.3); }
+  #lumo.wave .body { animation: wave .9s ease-in-out; }
+  @keyframes leave { 0% { transform: none } 25% { transform: scale(1.12, .84) translateY(28px) } 100% { transform: translateY(-1500px) scale(.3) rotate(-20deg); opacity: 0 } }
+  @keyframes arrive { 0% { transform: translateY(-1400px) scale(.4); opacity: 0 } 60% { transform: translateY(18px) scale(1.08, .92); opacity: 1 } 80% { transform: translateY(-16px) } 100% { transform: none } }
+  @keyframes wave { 25% { transform: rotate(-10deg) } 50% { transform: rotate(8deg) } 75% { transform: rotate(-5deg) } }
+
+  /* ---------- glass system ---------- */
+  .glass { background: var(--glass); border: 1px solid var(--line); border-radius: 28px;
+    backdrop-filter: blur(22px) saturate(140%); -webkit-backdrop-filter: blur(22px) saturate(140%);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12), 0 20px 50px rgba(0,0,0,.35); }
+  .eyebrow { font: 700 18px/1 var(--sans); letter-spacing: .32em; text-transform: uppercase; color: var(--gold); }
+
+  /* Place card */
+  #place { position: absolute; left: 40px; right: 40px; top: 200px; padding: 22px 30px 24px; overflow: hidden; }
+  #place .row { display: flex; justify-content: space-between; align-items: flex-end; }
+  #place .name { font: italic 500 46px/1.1 var(--serif); margin-top: 10px; letter-spacing: -.01em; }
+  #place .when { font: 600 20px/1 var(--sans); color: var(--muted); padding-bottom: 6px; white-space: nowrap; }
+  #stayBar { position: absolute; left: 0; bottom: 0; height: 3px; width: 0; background: linear-gradient(90deg, var(--gold), var(--gold-2)); box-shadow: 0 0 12px var(--gold); transition: width .5s linear; }
+
+  /* Goal */
+  #goal { position: absolute; left: 40px; right: 40px; top: 372px; }
+  #goal .row { display: flex; justify-content: space-between; align-items: baseline; padding: 0 6px 10px; }
+  #goal .t { font: 700 18px var(--sans); letter-spacing: .28em; text-transform: uppercase; }
+  #goal .t em { font: italic 400 22px var(--serif); letter-spacing: 0; text-transform: none; color: var(--muted); margin-left: 10px; }
+  #goal .n { font: 600 20px var(--sans); color: var(--muted); font-variant-numeric: tabular-nums; }
+  .track { height: 8px; border-radius: 8px; background: rgba(255,255,255,.1); overflow: hidden; }
+  .fill { height: 100%; width: 0; border-radius: 8px; background: linear-gradient(90deg, #b8894a, var(--gold), var(--gold-2));
+    box-shadow: 0 0 16px rgba(232,201,138,.7); transition: width .9s cubic-bezier(.2,.9,.3,1.1); }
+
+  /* Send Lumo panel */
+  #menu { position: absolute; left: 40px; top: 450px; width: 470px; padding: 22px 22px 16px; }
+  #menu .rows { display: flex; flex-direction: column; gap: 2px; margin-top: 12px; }
+  .dest { display: flex; align-items: center; gap: 14px; padding: 6px 8px; border-radius: 18px; transition: background .4s, opacity .4s; }
+  .dest .chip { width: 46px; height: 46px; flex: none; border-radius: 50%; display: grid; place-items: center; font-size: 24px;
+    background: radial-gradient(circle at 35% 30%, rgba(255,255,255,.22), rgba(255,255,255,.04)); border: 1px solid var(--line); }
+  .dest .what { font: 500 24px/1.12 var(--serif); white-space: nowrap; }
+  .dest .gift { font: 600 15px var(--sans); color: var(--faint); letter-spacing: .04em; margin-top: 2px; }
+  .dest.epic .what { font-style: italic; background: linear-gradient(90deg, #f3c7ff, var(--gold-2)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .dest.here { opacity: .35; }
+  .dest.flash { animation: flash 1.6s ease; }
+  @keyframes flash { 0%, 100% { background: transparent } 20%, 60% { background: rgba(232,201,138,.22) } }
+  #menu .divider { height: 1px; background: var(--line); margin: 12px 4px 12px; }
+  #sounds { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; }
+  .snd { display: flex; align-items: center; gap: 10px; padding: 6px 12px; border-radius: 16px; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.08); }
+  .snd .i { font-size: 22px; }
+  .snd .w { font: 600 18px var(--sans); }
+  .snd.flash { animation: flash 1.6s ease; }
+  #menu .hint { margin-top: 10px; font: italic 400 19px var(--serif); color: var(--muted); text-align: center; }
+
+  /* Tour guide */
+  #topFan { position: absolute; right: 40px; top: 450px; width: 290px; padding: 22px 18px 20px; text-align: center; }
+  #fanAvatar { width: 96px; height: 96px; margin: 14px auto 10px; border-radius: 50%; padding: 3px;
+    background: conic-gradient(from 0deg, #b8894a, var(--gold-2), var(--gold), #b8894a); box-shadow: 0 0 24px rgba(232,201,138,.45); }
+  #fanAvatar .in { width: 100%; height: 100%; border-radius: 50%; background: #1a1424 center/cover; display: grid; place-items: center;
+    font: 500 40px var(--serif); color: var(--gold-2); }
+  #fanName { font: 700 26px var(--sans); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #fanCoins { font: 600 18px var(--sans); color: var(--muted); margin-top: 4px; }
+  #topFan.steal { animation: steal 1.2s ease; }
+  @keyframes steal { 30% { transform: scale(1.06); box-shadow: 0 0 60px rgba(232,201,138,.6) } }
+
+  /* Likes */
+  #likes { position: absolute; right: 40px; top: 760px; width: 290px; padding: 18px 20px; }
+  #likes .row { display: flex; justify-content: space-between; margin-bottom: 10px; font: 600 17px var(--sans); color: var(--muted); }
+  #likes .fill { background: linear-gradient(90deg, #ff6f9b, #ffb3c8); box-shadow: 0 0 14px rgba(255,111,155,.6); }
+
+  /* Active sound layers */
+  #layers { position: absolute; right: 40px; top: 870px; width: 290px; display: flex; flex-direction: column; gap: 8px; align-items: stretch; }
+  .layer { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 18px; font: 700 18px var(--sans); letter-spacing: .14em; text-transform: uppercase; }
+  .layer .s { margin-left: auto; letter-spacing: 0; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .eq { display: flex; gap: 3px; align-items: flex-end; height: 18px; }
+  .eq i { width: 3px; background: var(--gold); border-radius: 2px; animation: eq 1s ease-in-out infinite; }
+  .eq i:nth-child(2) { animation-delay: -.3s } .eq i:nth-child(3) { animation-delay: -.6s } .eq i:nth-child(4) { animation-delay: -.15s }
+  @keyframes eq { 0%, 100% { height: 4px } 50% { height: 18px } }
+
+  /* Arrival title */
+  #title { position: absolute; left: 0; right: 0; top: 880px; text-align: center; pointer-events: none; opacity: 0; transition: opacity 1s ease; }
+  #title.on { opacity: 1; }
+  #title .k { display: inline-flex; align-items: center; gap: 18px; }
+  #title .k::before, #title .k::after { content: ""; width: 70px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold)); }
+  #title .k::after { transform: scaleX(-1); }
+  #title .n { font: italic 400 78px/1.05 var(--serif); margin-top: 16px; padding: 0 60px; text-shadow: 0 8px 40px rgba(0,0,0,.6);
+    letter-spacing: .02em; filter: blur(12px); transform: scale(1.06); transition: filter 1.4s ease, transform 1.6s ease, letter-spacing 2.4s ease; }
+  #title.on .n { filter: none; transform: none; letter-spacing: -.005em; }
+
+  /* Callout */
+  #callout { position: absolute; left: 50%; top: 920px; transform: translate(-50%, 20px); opacity: 0; transition: all .5s cubic-bezier(.2,.9,.3,1.2);
+    display: flex; align-items: center; gap: 18px; padding: 14px 30px 14px 14px; border-radius: 60px; white-space: nowrap; background: var(--glass-strong); }
+  #callout.on { opacity: 1; transform: translate(-50%, 0); }
+  #callout.travel { border-color: rgba(232,201,138,.55); box-shadow: 0 0 40px rgba(232,201,138,.25), inset 0 1px 0 rgba(255,255,255,.12); }
+  #callout.epic { border-color: rgba(243,199,255,.7); box-shadow: 0 0 50px rgba(200,140,255,.4), inset 0 1px 0 rgba(255,255,255,.12); }
+  #callout .av { width: 64px; height: 64px; border-radius: 50%; flex: none; background: #1a1424 center/cover; display: grid; place-items: center;
+    font: 500 28px var(--serif); color: var(--gold-2); border: 2px solid rgba(232,201,138,.6); }
+  #callout .who { font: 800 26px var(--sans); }
+  #callout .what { font: italic 400 26px var(--serif); color: var(--ink); opacity: .9; }
+
+  .floaty { position: absolute; pointer-events: none; animation: floatUp 2.2s ease-out forwards; display: flex; align-items: center; gap: 10px;
+    padding: 8px 18px 8px 10px; border-radius: 40px; font: 700 20px var(--sans); }
+  .floaty .e { font-size: 30px; }
+  .floaty.solo { padding: 0; background: none; border: 0; box-shadow: none; font-size: 44px; color: var(--gold-2); }
+  @keyframes floatUp { 0% { transform: translateY(0) scale(.7); opacity: 0 } 15% { opacity: 1; transform: translateY(-30px) scale(1) } 100% { transform: translateY(-300px); opacity: 0 } }
+  #toast { position: absolute; right: 40px; top: 1080px; max-width: 400px; padding: 12px 20px; font: 700 20px var(--sans); opacity: 0; transform: translateX(20px); transition: all .4s; }
+  #toast.on { opacity: 1; transform: none; }
+  .flashscreen { position: absolute; inset: 0; background: #fff; pointer-events: none; animation: fs .7s ease-out forwards; }
+  @keyframes fs { from { opacity: .6 } to { opacity: 0 } }
+  #status { position: absolute; left: 12px; bottom: 6px; font: 600 14px var(--sans); opacity: .35; display: none; }
+  .debug #status { display: block; }
+
+  #unlock { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.6); z-index: 9; cursor: pointer;
+    font: italic 400 30px "Fraunces", Georgia, serif; color: #f4efe6; }
+  #unlock.on { display: flex; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="scene active" id="sceneA"></div>
+  <div class="scene prep" id="sceneB"></div>
+  <canvas id="fx" width="1080" height="1920"></canvas>
+  <div id="warp"></div>
+
+  <div id="lumo"><div class="float"><div class="body" id="lumoBody">
+    <svg viewBox="-20 -20 240 260" aria-label="Lumo">
+      <defs>
+        <radialGradient id="lb" cx="40%" cy="34%" r="72%">
+          <stop offset="0" stop-color="#fffaf0"/><stop offset=".3" stop-color="#ffe2a6"/><stop offset=".68" stop-color="#f6a957"/><stop offset="1" stop-color="#b9592b"/>
+        </radialGradient>
+        <radialGradient id="core" cx="50%" cy="58%" r="50%">
+          <stop offset="0" stop-color="#fff6d6" stop-opacity=".85"/><stop offset="1" stop-color="#fff6d6" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="rim" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#fff4dc" stop-opacity=".9"/><stop offset=".45" stop-color="#fff4dc" stop-opacity="0"/>
+          <stop offset=".8" stop-color="#ffb98a" stop-opacity="0"/><stop offset="1" stop-color="#ffc59e" stop-opacity=".8"/>
+        </linearGradient>
+        <radialGradient id="earIn" cx="50%" cy="40%" r="60%"><stop offset="0" stop-color="#ffc9b0"/><stop offset="1" stop-color="#f08e63"/></radialGradient>
+        <radialGradient id="ear" cx="35%" cy="25%" r="80%"><stop offset="0" stop-color="#ffd59a"/><stop offset="1" stop-color="#d46e36"/></radialGradient>
+        <radialGradient id="iris" cx="45%" cy="40%" r="60%"><stop offset="0" stop-color="#6a4632"/><stop offset=".55" stop-color="#2c1b24"/><stop offset="1" stop-color="#140c14"/></radialGradient>
+        <radialGradient id="bulb" cx="40%" cy="35%"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#fff2b8"/><stop offset="1" stop-color="#ffc861"/></radialGradient>
+        <radialGradient id="halo"><stop offset="0" stop-color="#ffe2a0" stop-opacity=".55"/><stop offset=".6" stop-color="#ffb867" stop-opacity=".12"/><stop offset="1" stop-color="#ffb867" stop-opacity="0"/></radialGradient>
+        <linearGradient id="scarf" x1="0" x2="1"><stop offset="0" stop-color="#2fb7bf"/><stop offset=".5" stop-color="#5fe0e0"/><stop offset="1" stop-color="#238e9e"/></linearGradient>
+        <pattern id="knit" width="7" height="8" patternUnits="userSpaceOnUse"><path d="M0 0 L3.5 5 L7 0" stroke="#ffffff" stroke-opacity=".22" stroke-width="1.2" fill="none"/></pattern>
+        <filter id="blur6" x="-2" y="-2" width="5" height="5"><feGaussianBlur stdDeviation="6"/></filter>
+        <filter id="blur2" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="1.4"/></filter>
+      </defs>
+      <circle cx="100" cy="128" r="118" fill="url(#halo)"/>
+      <path d="M100 58 Q92 30 112 15" stroke="#d9773c" stroke-width="5.5" fill="none" stroke-linecap="round"/>
+      <path d="M99 54 Q93 32 110 18" stroke="#ffd29a" stroke-width="1.6" fill="none" stroke-linecap="round" opacity=".7"/>
+      <circle class="bloom" cx="114" cy="14" r="22" fill="#fff3c0" opacity=".55" filter="url(#blur6)"/>
+      <circle cx="114" cy="14" r="10.5" fill="url(#bulb)"/>
+      <circle cx="110.5" cy="10.5" r="3" fill="#fff"/>
+      <ellipse cx="44" cy="82" rx="16" ry="26" transform="rotate(-28 44 82)" fill="url(#ear)"/>
+      <ellipse cx="156" cy="82" rx="16" ry="26" transform="rotate(28 156 82)" fill="url(#ear)"/>
+      <ellipse cx="46" cy="85" rx="7" ry="15" transform="rotate(-28 46 85)" fill="url(#earIn)" opacity=".8"/>
+      <ellipse cx="154" cy="85" rx="7" ry="15" transform="rotate(28 154 85)" fill="url(#earIn)" opacity=".8"/>
+      <ellipse cx="70" cy="202" rx="23" ry="11.5" fill="#c4622f"/><ellipse cx="130" cy="202" rx="23" ry="11.5" fill="#c4622f"/>
+      <ellipse cx="66" cy="198" rx="10" ry="4" fill="#ffb27a" opacity=".5"/><ellipse cx="126" cy="198" rx="10" ry="4" fill="#ffb27a" opacity=".5"/>
+      <ellipse cx="100" cy="130" rx="74" ry="78" fill="url(#lb)"/>
+      <ellipse cx="100" cy="142" rx="56" ry="54" fill="url(#core)"/>
+      <ellipse cx="100" cy="130" rx="73" ry="77" fill="none" stroke="url(#rim)" stroke-width="2.5"/>
+      <ellipse cx="74" cy="84" rx="28" ry="13" transform="rotate(-24 74 84)" fill="#fff" opacity=".42" filter="url(#blur2)"/>
+      <g class="eyes">
+        <ellipse cx="75" cy="124" rx="12" ry="16" fill="url(#iris)"/><ellipse cx="125" cy="124" rx="12" ry="16" fill="url(#iris)"/>
+        <ellipse cx="79.5" cy="116.5" rx="5" ry="5.5" fill="#fff"/><ellipse cx="129.5" cy="116.5" rx="5" ry="5.5" fill="#fff"/>
+        <circle cx="71" cy="131" r="2.2" fill="#fff" opacity=".85"/><circle cx="121" cy="131" r="2.2" fill="#fff" opacity=".85"/>
+        <path d="M66 136 Q75 141 84 136" stroke="#ffd9a8" stroke-width="1.5" fill="none" opacity=".5"/>
+        <path d="M116 136 Q125 141 134 136" stroke="#ffd9a8" stroke-width="1.5" fill="none" opacity=".5"/>
+      </g>
+      <ellipse cx="55" cy="148" rx="13" ry="7" fill="#ff7f7f" opacity=".42" filter="url(#blur2)"/>
+      <ellipse cx="145" cy="148" rx="13" ry="7" fill="#ff7f7f" opacity=".42" filter="url(#blur2)"/>
+      <path d="M90 149 Q100 161 110 149 Q100 155 90 149Z" fill="#3a2028"/>
+      <path d="M36 166 Q100 192 164 166 L162 182 Q100 208 38 182Z" fill="url(#scarf)"/>
+      <path d="M36 166 Q100 192 164 166 L162 182 Q100 208 38 182Z" fill="url(#knit)"/>
+      <path d="M40 168 Q100 192 160 168" stroke="#bff6f6" stroke-width="1.5" fill="none" opacity=".6"/>
+      <path d="M138 182 Q146 200 158 218 L146 220 Q138 204 130 186Z" fill="#238e9e"/>
+      <path d="M138 182 Q146 200 158 218 L146 220 Q138 204 130 186Z" fill="url(#knit)"/>
+      <path d="M147 220 l-2 8 M151 219 l0 8 M155 218 l2 8" stroke="#5fe0e0" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </div></div><div class="shadow"></div></div>
+
+  <div id="vignette"></div>
+  <div id="grain"></div>
+
+  <div id="place" class="glass">
+    <div class="row">
+      <div><div class="eyebrow" id="placeKicker">Home base</div><div class="name" id="placeName"></div></div>
+      <div class="when" id="placeWhen"></div>
+    </div>
+    <div id="stayBar"></div>
+  </div>
+
+  <div id="goal">
+    <div class="row"><div class="t" id="goalLabel"></div><div class="n" id="goalNum"></div></div>
+    <div class="track"><div class="fill" id="goalFill"></div></div>
+  </div>
+
+  <div id="menu" class="glass">
+    <div class="eyebrow">Send Lumo to</div>
+    <div class="rows" id="dests"></div>
+    <div class="divider"></div>
+    <div class="eyebrow">Layer the sound</div>
+    <div id="sounds"></div>
+    <div class="hint" id="hint"></div>
+  </div>
+
+  <div id="topFan" class="glass">
+    <div class="eyebrow">Tour guide</div>
+    <div id="fanAvatar"><div class="in" id="fanPic"></div></div>
+    <div id="fanName">Be the first</div>
+    <div id="fanCoins">send any gift</div>
+  </div>
+
+  <div id="likes" class="glass">
+    <div class="row"><span id="likeLbl"></span><span id="likeNum"></span></div>
+    <div class="track"><div class="fill" id="likeFill"></div></div>
+  </div>
+
+  <div id="layers"></div>
+
+  <div id="title"><div class="eyebrow k">Now arriving</div><div class="n" id="titleName"></div></div>
+  <div id="callout" class="glass"><div class="av" id="calloutPic"></div><div><div class="who" id="calloutWho"></div><div class="what" id="calloutWhat"></div></div></div>
+  <div id="toast" class="glass"></div>
+  <div id="status"></div>
+</div>
+<div id="unlock">Tap anywhere to turn on the sound</div>
+
+<script src="sound.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const stage = $('stage');
+if (new URLSearchParams(location.search).has('debug')) document.body.classList.add('debug');
+const fit = () => { const s = Math.min(innerWidth / 1080, innerHeight / 1920); stage.style.transform = `translate(-50%, -50%) scale(${s})`; };
+addEventListener('resize', fit); fit();
+
+let cfg, existing = new Set();
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem('lumo_' + k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('lumo_' + k, JSON.stringify(v)); } catch {} },
+};
+let state = store.get('state', { goal: 0, likes: 0, fans: {} });
+const save = () => store.set('state', state);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+let here = null;
+let returnAt = 0;
+const travelQueue = [];
+let traveling = false;
+let front = $('sceneA'), back = $('sceneB');
+
+// ---------- scenes ----------
+function paint(el, place) {
+  const [s0, s1] = place.sky, [g1, g2, g3] = place.glow || ['#ffb867', '#7a4cff', '#ff7a59'];
+  Object.entries({ '--s0': s0, '--s1': s1, '--g1': g1, '--g2': g2, '--g3': g3 }).forEach(([k, v]) => el.style.setProperty(k, v));
+  if (place.bg && existing.has(place.bg)) {
+    const isVid = /\.(mp4|webm)$/i.test(place.bg);
+    el.innerHTML = '';
+    const m = document.createElement(isVid ? 'video' : 'img');
+    m.src = place.bg;
+    if (isVid) { m.muted = true; m.loop = true; m.autoplay = true; m.playsInline = true; } else m.className = 'bg';
+    el.appendChild(m);
+  } else {
+    // Placeholder scene until a real background exists: drifting light, rays and fog in the place's colors.
+    el.innerHTML = '<div class="base"></div><div class="orb o1"></div><div class="orb o2"></div><div class="orb o3"></div><div class="rays"></div><div class="fog"></div>';
+  }
+}
+
+// ---------- particles ----------
+const ctx = $('fx').getContext('2d');
+let parts = [], rainLayer = false, extra = [];
+const R = Math.random;
+function spawn(type) {
+  if (type === 'rain') return { t: type, x: R() * 1200 - 60, y: R() * 1920, v: 26 + R() * 16, l: 26 + R() * 30, a: .15 + R() * .35 };
+  if (type === 'bubbles') return { t: type, x: R() * 1080, y: 1920 + R() * 1920, v: .8 + R() * 2.2, r: 3 + R() * 14, w: R() * 6 };
+  if (type === 'sparkles') return { t: type, x: R() * 1080, y: R() * 1700, r: .8 + R() * 2.4, ph: R() * 6 };
+  if (type === 'embers') return { t: type, x: 300 + R() * 480, y: 1300 + R() * 650, v: .8 + R() * 2.6, r: 1.2 + R() * 2.6, w: R() * 6, life: 0 };
+  return { t: 'dust', x: R() * 1080, y: R() * 1920, vx: (R() - .5) * .35, vy: -.08 - R() * .25, r: .8 + R() * 2.2, ph: R() * 6 };
+}
+const COUNT = { rain: 240, bubbles: 60, sparkles: 120, embers: 80, dust: 70 };
+function setParticles(type) { parts = Array.from({ length: COUNT[type] || 60 }, () => spawn(type)); }
+function draw(time) {
+  ctx.clearRect(0, 0, 1080, 1920);
+  const want = rainLayer ? 180 : 0;
+  while (extra.length < want) extra.push(spawn('rain'));
+  if (extra.length > want) extra.length = want;
+  for (const p of parts.concat(extra)) {
+    if (p.t === 'rain') {
+      p.y += p.v; p.x -= p.v * .12;
+      if (p.y > 1920) { p.y = -40; p.x = R() * 1200; }
+      ctx.strokeStyle = `rgba(210,225,255,${p.a})`; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + p.l * .12, p.y - p.l); ctx.stroke();
+    } else if (p.t === 'bubbles') {
+      p.y -= p.v; p.w += .03;
+      if (p.y < -30) { p.y = 1950; p.x = R() * 1080; }
+      const x = p.x + Math.sin(p.w) * 10;
+      ctx.strokeStyle = 'rgba(190,240,255,.45)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(x, p.y, p.r, 0, 7); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,255,255,.5)'; ctx.beginPath(); ctx.arc(x - p.r * .35, p.y - p.r * .35, p.r * .2, 0, 7); ctx.fill();
+    } else if (p.t === 'sparkles') {
+      const a = (Math.sin(time / 700 + p.ph) + 1) / 2;
+      ctx.fillStyle = `rgba(230,215,255,${a * .9})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (0.4 + a), 0, 7); ctx.fill();
+    } else if (p.t === 'embers') {
+      p.y -= p.v; p.w += .05; p.life++;
+      if (p.y < 650 || p.life > 420) Object.assign(p, spawn('embers'));
+      const a = Math.max(0, 1 - p.life / 420) * (0.55 + R() * .45);
+      ctx.fillStyle = `rgba(255,${130 + R() * 80 | 0},60,${a})`;
+      ctx.beginPath(); ctx.arc(p.x + Math.sin(p.w) * 14, p.y, p.r, 0, 7); ctx.fill();
+    } else {
+      p.x += p.vx; p.y += p.vy;
+      if (p.y < -10) { p.y = 1930; p.x = R() * 1080; }
+      const a = (Math.sin(time / 1400 + p.ph) + 1) / 2 * .55;
+      ctx.fillStyle = `rgba(255,226,170,${a})`;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fill();
+    }
+  }
+  requestAnimationFrame(draw);
+}
+
+function flash() { const f = document.createElement('div'); f.className = 'flashscreen'; stage.appendChild(f); setTimeout(() => f.remove(), 800); }
+Sound.hooks.thunder = () => { flash(); setTimeout(flash, 180); };
+
+// ---------- travel ----------
+function placeById(id) {
+  if (id === 'home') return cfg.home;
+  if (id === 'random') { const o = cfg.places.filter((p) => p !== here); return o[Math.floor(R() * o.length)]; }
+  return cfg.places.find((p) => p.id === id);
+}
+function requestTravel(job) { travelQueue.push(job); if (!traveling) runTravel(); }
+
+async function runTravel() {
+  traveling = true;
+  while (travelQueue.length) {
+    const job = travelQueue.shift();
+    const place = typeof job.place === 'string' ? placeById(job.place) : job.place;
+    if (!place || place === here) continue;
+    await hop(place);
+    if (travelQueue.length) { returnAt = 0; await countdown(20); }
+  }
+  traveling = false;
+  returnAt = here === cfg.home ? 0 : Date.now() + cfg.staySeconds * 1000;
+}
+async function countdown(sec) {
+  const end = Date.now() + sec * 1000;
+  while (Date.now() < end) {
+    $('placeWhen').textContent = `next stop in ${Math.ceil((end - Date.now()) / 1000)}s`;
+    $('stayBar').style.width = ((end - Date.now()) / (sec * 1000)) * 100 + '%';
+    await sleep(250);
+  }
+}
+
+async function hop(place, instant) {
+  if (instant) { paint(front, place); setParticles(place.particles); Sound.ambient(place.sound); setHere(place); return; }
+  Sound.oneshot('whoosh');
+  $('lumo').className = 'leave';
+  $('title').classList.remove('on');
+  await sleep(450);
+  $('warp').classList.remove('go'); void $('warp').offsetWidth; $('warp').classList.add('go');
+  paint(back, place);
+  back.className = 'scene prep'; void back.offsetWidth;
+  back.className = 'scene active';
+  front.className = 'scene exit';
+  [front, back] = [back, front];
+  setTimeout(() => Sound.ambient(place.sound), 300);
+  setTimeout(() => setParticles(place.particles), 900);
+  await sleep(1500);
+  setHere(place);
+  $('titleName').textContent = place.name;
+  // The title and gift callouts share the middle of the screen, so callouts wait while it shows.
+  titleOn = true;
+  $('callout').classList.remove('on');
+  $('title').classList.add('on');
+  setTimeout(() => { $('title').classList.remove('on'); setTimeout(() => (titleOn = false), 900); }, 3800);
+  $('lumo').className = place.lumoInVideo ? 'hidden' : 'arrive';
+  Sound.oneshot('arrive');
+  await sleep(1300);
+  $('lumo').className = place.lumoInVideo ? 'hidden' : '';
+}
+
+function setHere(place) {
+  here = place;
+  $('placeKicker').textContent = place === cfg.home ? 'Home base' : 'Now exploring';
+  $('placeName').textContent = place.name;
+  $('lumo').classList.toggle('hidden', !!place.lumoInVideo);
+  cfg.gifts.forEach((g, i) => { const el = $('g' + i); if (el) el.classList.toggle('here', g.action === 'travel' && g.place === place.id); });
+}
+
+const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+setInterval(() => {
+  if (!traveling && returnAt && Date.now() >= returnAt) {
+    returnAt = 0;
+    callout({ who: cfg.mascot, what: `is heading home to ${cfg.home.name}`, cls: 'travel' });
+    requestTravel({ place: 'home' });
+  }
+  if (!traveling) {
+    if (returnAt) {
+      const left = Math.max(0, Math.ceil((returnAt - Date.now()) / 1000));
+      $('placeWhen').textContent = `home in ${fmt(left)}`;
+      $('stayBar').style.width = (left / cfg.staySeconds) * 100 + '%';
+    } else { $('placeWhen').textContent = 'waiting for a gift'; $('stayBar').style.width = '0'; }
+  }
+  const ls = Sound.activeLayers();
+  $('layers').innerHTML = ls.map((l) => `<div class="layer glass"><span class="eq"><i></i><i></i><i></i><i></i></span>${esc(l.name)}<span class="s">${fmt(l.left)}</span></div>`).join('');
+  rainLayer = ls.some((l) => l.name === 'rain');
+}, 500);
+
+// ---------- callouts ----------
+const calloutQueue = [];
+let calling = false, titleOn = false;
+function avatar(el, name, pic) {
+  el.style.backgroundImage = pic ? `url("${pic}")` : '';
+  el.textContent = pic ? '' : (String(name || '?').trim()[0] || '?').toUpperCase();
+}
+function callout(c) { calloutQueue.push(c); if (!calling) nextCallout(); }
+async function nextCallout() {
+  const c = calloutQueue.shift();
+  if (!c) { calling = false; return; }
+  calling = true;
+  while (titleOn) await sleep(200);
+  $('calloutWho').textContent = c.who;
+  $('calloutWhat').textContent = c.what;
+  avatar($('calloutPic'), c.who, c.pic);
+  $('callout').className = 'glass on ' + (c.cls || '');
+  await sleep(calloutQueue.length > 3 ? 1300 : 2800);
+  $('callout').className = 'glass ' + (c.cls || '');
+  await sleep(450);
+  nextCallout();
+}
+
+function floatAt(emoji, label) {
+  const el = document.createElement('div');
+  el.className = 'floaty ' + (label ? 'glass' : 'solo');
+  el.style.left = (320 + R() * 330) + 'px'; el.style.top = '1180px';
+  el.innerHTML = `<span class="e">${emoji}</span>${label ? esc(label) : ''}`;
+  stage.appendChild(el);
+  setTimeout(() => el.remove(), 2300);
+}
+let toastTimer;
+function toast(text) { $('toast').textContent = text; $('toast').classList.add('on'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('on'), 3200); }
+function wave() {
+  if ($('lumo').className) return;
+  $('lumo').className = 'wave';
+  setTimeout(() => { if ($('lumo').className === 'wave') $('lumo').className = ''; }, 950);
+}
+
+function render() {
+  const g = cfg.goal;
+  $('goalLabel').innerHTML = `${esc(g.label)}<em>${esc(g.sub || '')}</em>`;
+  $('goalNum').textContent = `${Math.min(state.goal, g.target).toLocaleString()} / ${g.target.toLocaleString()}`;
+  $('goalFill').style.width = Math.min(100, (state.goal / g.target) * 100) + '%';
+  $('likeNum').textContent = `${state.likes} / ${cfg.likeMeter.target}`;
+  $('likeFill').style.width = Math.min(100, (state.likes / cfg.likeMeter.target) * 100) + '%';
+  const top = Object.values(state.fans).sort((a, b) => b.coins - a.coins)[0];
+  if (top) { $('fanName').textContent = top.name; $('fanCoins').textContent = `${top.coins.toLocaleString()} coins`; avatar($('fanPic'), top.name, top.pic); }
+  else { $('fanName').textContent = 'Be the first'; $('fanCoins').textContent = 'send any gift'; avatar($('fanPic'), '♛', ''); }
+}
+
+function flashGift(i) { const el = $('g' + i); if (!el) return; el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+
+// ---------- events ----------
+function handle(ev) {
+  if (ev.type === 'status') { $('status').textContent = ev.text; return; }
+  if (ev.type === 'reset') { state = { goal: 0, likes: 0, fans: {} }; save(); render(); return; }
+
+  if (ev.type === 'gift') {
+    const idx = cfg.gifts.findIndex((g) => g.gift.toLowerCase() === String(ev.gift).toLowerCase());
+    const g = idx >= 0 ? cfg.gifts[idx] : cfg.defaultGift;
+    const total = (ev.coins || 1) * (ev.count || 1);
+
+    const key = ev.user.id || ev.user.name;
+    const prevTop = Object.values(state.fans).sort((a, b) => b.coins - a.coins)[0];
+    const f = state.fans[key] || { name: ev.user.name, pic: ev.user.pic, coins: 0 };
+    f.coins += total; f.name = ev.user.name; f.pic = ev.user.pic || f.pic;
+    state.fans[key] = f;
+    const newTop = Object.values(state.fans).sort((a, b) => b.coins - a.coins)[0];
+    if (prevTop && newTop.name !== prevTop.name) {
+      $('topFan').classList.remove('steal'); void $('topFan').offsetWidth; $('topFan').classList.add('steal');
+      toast(`${newTop.name} is the new Tour Guide`);
+    }
+    const before = state.goal;
+    state.goal += total;
+    save(); render();
+    if (idx >= 0) flashGift(idx);
+    const times = ev.count > 1 ? ` ×${ev.count}` : '';
+
+    if (g.action === 'travel') {
+      const dest = placeById(g.place);
+      callout({ who: ev.user.name, what: g.place === 'random' ? `sent Lumo somewhere unknown${times}` : `sent Lumo to ${dest.name}${times}`, pic: ev.user.pic, cls: g.epic ? 'epic' : 'travel' });
+      if (g.epic) { flash(); Sound.oneshot('fanfare'); }
+      requestTravel({ place: g.place === 'random' ? dest : g.place });
+    } else if (g.action === 'layer') {
+      Sound.layer(g.sound, (g.seconds || 60) * (ev.count || 1));
+      callout({ who: ev.user.name, what: `added ${g.label.toLowerCase()} to the air${times}`, pic: ev.user.pic });
+    } else {
+      Sound.oneshot(g.sound || 'chime');
+      floatAt(idx >= 0 ? g.icon : '✦');
+      callout({ who: ev.user.name, what: `rang a ${g.label.toLowerCase()}${times}`, pic: ev.user.pic });
+    }
+
+    if (before < cfg.goal.target && state.goal >= cfg.goal.target) {
+      setTimeout(() => {
+        callout({ who: 'Grand Tour unlocked', what: 'Lumo visits every place', cls: 'epic' });
+        Sound.oneshot('fanfare');
+        cfg.places.filter((p) => p !== here).forEach((p) => requestTravel({ place: p }));
+      }, 1500);
+    }
+  }
+
+  if (ev.type === 'like') {
+    state.likes += ev.count || 1;
+    if (R() < 0.4) floatAt('♥');
+    if (state.likes >= cfg.likeMeter.target) {
+      state.likes = 0;
+      wave(); Sound.oneshot('wave');
+      callout({ who: 'Like goal reached', what: 'Lumo waves at everyone' });
+    }
+    save(); render();
+  }
+  if (ev.type === 'chat') {
+    const cmd = cfg.chatCommands?.[String(ev.text).trim().toLowerCase()];
+    if (cmd === 'wave') { wave(); Sound.oneshot('wave'); floatAt('👋', ev.user.name); }
+    if (cmd === 'heart') { Sound.oneshot('heart'); floatAt('♥', ev.user.name); }
+  }
+  if (ev.type === 'follow') { toast(`${ev.user.name} joined the journey`); wave(); }
+  if (ev.type === 'share') toast(`${ev.user.name} shared the LIVE`);
+}
+
+function connect() {
+  const ws = new WebSocket(`ws://${location.host}`);
+  ws.onmessage = (m) => handle(JSON.parse(m.data));
+  ws.onclose = () => { $('status').textContent = 'reconnecting to overlay server...'; setTimeout(connect, 2000); };
+}
+
+async function headOk(url) { try { return (await fetch(url, { method: 'HEAD' })).ok; } catch { return false; } }
+
+async function init() {
+  cfg = await (await fetch('/config?name=travel')).json();
+  const all = [cfg.home, ...cfg.places];
+  await Promise.all(all.map(async (p) => { if (p.bg && await headOk(p.bg)) existing.add(p.bg); }));
+
+  // Swap the drawn Lumo for a real asset (transparent .webm or .png) once it exists.
+  if (cfg.lumo?.src && await headOk(cfg.lumo.src)) {
+    const isVid = /\.(webm|mp4|mov)$/i.test(cfg.lumo.src);
+    const m = document.createElement(isVid ? 'video' : 'img');
+    m.src = cfg.lumo.src;
+    if (isVid) { m.muted = true; m.loop = true; m.autoplay = true; m.playsInline = true; }
+    $('lumoBody').replaceChildren(m);
+  }
+
+  const soundNames = [...new Set([...all.flatMap((p) => p.sound), ...cfg.gifts.map((g) => g.sound).filter(Boolean),
+    'whoosh', 'arrive', 'wave', 'heart', 'fanfare', 'chime', 'bubbles'])];
+  await Sound.init(cfg.volume ?? 0.8, soundNames);
+
+  $('dests').innerHTML = cfg.gifts.map((g, i) => g.action !== 'travel' ? '' :
+    `<div class="dest ${g.epic ? 'epic' : ''}" id="g${i}"><div class="chip">${g.icon}</div><div><div class="what">${esc(g.label)}</div><div class="gift">${esc(g.gift)}</div></div></div>`).join('');
+  $('sounds').innerHTML = cfg.gifts.map((g, i) => g.action === 'travel' ? '' :
+    `<div class="snd" id="g${i}"><span class="i">${g.icon}</span><span class="w">${esc(g.label)}</span></div>`).join('');
+  $('likeLbl').textContent = cfg.likeMeter.label;
+  $('hint').textContent = cfg.chatHint || '';
+  render();
+  hop(cfg.home, true);
+  requestAnimationFrame(draw);
+  connect();
+
+  await Sound.unlock();
+  if (Sound.locked) {
+    $('unlock').classList.add('on');
+    $('unlock').onclick = async () => { await Sound.unlock(); $('unlock').classList.remove('on'); };
+  }
+}
+init();
+</script>
+</body>
+</html>

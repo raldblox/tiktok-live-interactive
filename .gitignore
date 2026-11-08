@@ -1,0 +1,31 @@
+# Dependencies and secrets
+node_modules/
+.env
+runway-key.txt
+
+# Runtime noise
+*.log
+*.tmp.mp4
+*.backup.json
+
+# Generated media stays local (about 1.2 GB of renders and drafts).
+# A small curated showcase is committed in docs/media instead.
+videos/
+concepts/
+scenes/
+character/
+pfp/
+preview/
+studio/
+season2/videos/
+season2/refs/
+season2/*.png
+season2/*.jpg
+public/sounds/raw/
+
+# Personal working notes for the AI assistant (contains account details)
+CLAUDE.md
+
+# Local TikTok username for the Start scripts, and TikTok's internal gift list
+tiktok-user.txt
+season2/tiktok-gift-catalog.txt

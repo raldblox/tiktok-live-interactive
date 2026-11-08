@@ -1,0 +1,319 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>LIVE Overlay</title>
+<style>
+  :root { --gold: #ffd84a; --pink: #ff3d7f; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #000; }
+  body { font-family: "Arial Rounded MT Bold", "Segoe UI", system-ui, sans-serif; color: #fff; }
+
+  /* Fixed 1080x1920 stage, scaled to fit whatever window it is in */
+  #stage { position: absolute; width: 1080px; height: 1920px; left: 50%; top: 50%;
+    transform-origin: center; overflow: hidden;
+    background: radial-gradient(ellipse at 70% 15%, #2a2a5a 0%, #0b0b1e 45%, #000 100%); }
+  .stars { position: absolute; inset: 0; background-image:
+    radial-gradient(2px 2px at 20% 30%, #fff8, transparent), radial-gradient(2px 2px at 80% 10%, #fff9, transparent),
+    radial-gradient(1.5px 1.5px at 50% 20%, #fff7, transparent), radial-gradient(2px 2px at 35% 8%, #fffa, transparent),
+    radial-gradient(1.5px 1.5px at 65% 35%, #fff6, transparent), radial-gradient(2px 2px at 10% 12%, #fff8, transparent); }
+  .ground { position: absolute; left: -10%; right: -10%; top: 52%; bottom: 0; border-radius: 50% 50% 0 0 / 8% 8% 0 0;
+    background: linear-gradient(#bdbdbd, #7d7d7d 40%, #555); }
+  video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  #actionVid { opacity: 0; transition: opacity .15s; }
+  #actionVid.on { opacity: 1; }
+  .has-video .placeholder { display: none; }
+
+  /* Placeholder characters (used until you add real clips) */
+  #cast { position: absolute; left: 0; right: 0; top: 1060px; display: flex; justify-content: space-evenly; align-items: flex-end; }
+  .pup { display: flex; flex-direction: column; align-items: center; position: relative; }
+  .pup .body { font-size: 210px; line-height: 1; filter: drop-shadow(0 18px 10px #0006); }
+  .pup .tag { margin-top: 8px; font-size: 34px; background: #0008; padding: 4px 18px; border-radius: 30px; }
+  .pup .hat { position: absolute; top: -70px; font-size: 90px; opacity: 0; transition: opacity .3s; }
+  .pup.crowned .hat { opacity: 1; }
+  .dance .body { animation: dance .5s ease-in-out infinite; }
+  .spin .body  { animation: spin .8s linear infinite; }
+  .jump .body  { animation: jump .45s ease-out infinite; }
+  .rocket .body { animation: rocket 4s ease-in-out forwards; }
+  @keyframes dance { 0%,100% { transform: rotate(-14deg) translateY(0) } 50% { transform: rotate(14deg) translateY(-40px) } }
+  @keyframes spin  { to { transform: rotateY(360deg) } }
+  @keyframes jump  { 0%,100% { transform: translateY(0) scale(1,1) } 15% { transform: scale(1.15,.85) } 50% { transform: translateY(-120px) scale(.95,1.08) } }
+  @keyframes rocket { 0% { transform: none } 15% { transform: translateY(20px) } 60% { transform: translateY(-1400px) rotate(8deg) } 61% { transform: translateY(1200px) } 100% { transform: none } }
+
+  /* Gift menu banner (top-left, like the stream you saw) */
+  #menu { position: absolute; left: 40px; top: 300px; display: flex; flex-direction: column; gap: 14px; }
+  .item { display: flex; align-items: center; gap: 16px; font-size: 44px; font-weight: 900; color: var(--gold);
+    -webkit-text-stroke: 2px #000; paint-order: stroke fill; text-shadow: 0 4px 0 #000; }
+  .item .ico { font-size: 54px; -webkit-text-stroke: 0; }
+  .item.epic { color: #7df9ff; }
+  .item.flash { animation: flash .6s ease 3; }
+  @keyframes flash { 50% { transform: scale(1.18); color: #fff } }
+
+  /* Goal bar */
+  #goal { position: absolute; left: 40px; right: 40px; top: 210px; height: 64px; border-radius: 40px;
+    background: #000a; border: 3px solid #fff4; overflow: hidden; }
+  #goalFill { position: absolute; inset: 0; width: 0; background: linear-gradient(90deg, #ff3d7f, #ffb02e);
+    transition: width .8s cubic-bezier(.2,.9,.3,1.2); }
+  #goalText { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    font-size: 32px; font-weight: 900; text-shadow: 0 2px 4px #000; }
+
+  /* Top fan */
+  #topFan { position: absolute; right: 40px; top: 300px; width: 330px; padding: 18px; border-radius: 26px;
+    background: linear-gradient(160deg, #5b3b00cc, #1b1200cc); border: 3px solid var(--gold); text-align: center; }
+  #topFan .t { font-size: 28px; color: var(--gold); font-weight: 900; }
+  #topFan .n { font-size: 36px; font-weight: 900; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #topFan .c { font-size: 26px; opacity: .85; }
+  #topFan img { width: 90px; height: 90px; border-radius: 50%; border: 3px solid var(--gold); margin-top: 8px; object-fit: cover; }
+  #topFan.steal { animation: steal 1s ease; }
+  @keyframes steal { 30% { transform: scale(1.15) rotate(-3deg) } 60% { transform: scale(1.1) rotate(3deg) } }
+
+  /* Like meter */
+  #likes { position: absolute; right: 40px; top: 560px; width: 330px; }
+  #likes .lbl { font-size: 26px; font-weight: 900; text-align: center; text-shadow: 0 2px 4px #000; }
+  #likeBar { margin-top: 8px; height: 30px; border-radius: 20px; background: #000a; border: 2px solid #fff4; overflow: hidden; }
+  #likeFill { height: 100%; width: 0; background: linear-gradient(90deg, #ff7aa8, #ff3d7f); transition: width .4s; }
+  #likes .cnt { font-size: 24px; text-align: center; margin-top: 4px; opacity: .85; }
+
+  /* Who triggered the current reaction */
+  #callout { position: absolute; left: 50%; top: 820px; transform: translateX(-50%) scale(0); transition: transform .35s cubic-bezier(.2,1.6,.4,1);
+    display: flex; align-items: center; gap: 20px; padding: 18px 34px; border-radius: 60px; white-space: nowrap;
+    background: linear-gradient(90deg, #ff3d7fee, #ff8a00ee); box-shadow: 0 10px 30px #0008; }
+  #callout.on { transform: translateX(-50%) scale(1); }
+  #callout img { width: 84px; height: 84px; border-radius: 50%; border: 3px solid #fff; object-fit: cover; }
+  #callout .who { font-size: 40px; font-weight: 900; }
+  #callout .what { font-size: 30px; }
+  #callout.epic { background: linear-gradient(90deg, #6a00ff, #00c2ff); }
+
+  #queue { position: absolute; left: 50%; top: 960px; transform: translateX(-50%); font-size: 28px; font-weight: 900;
+    background: #0009; padding: 6px 22px; border-radius: 30px; display: none; }
+
+  #hint { position: absolute; left: 0; right: 0; top: 1360px; text-align: center; font-size: 34px; font-weight: 900;
+    text-shadow: 0 3px 6px #000; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .55 } }
+
+  .float { position: absolute; font-size: 70px; pointer-events: none; animation: floatUp 1.8s ease-out forwards; }
+  .float small { display: block; font-size: 24px; text-align: center; text-shadow: 0 2px 4px #000; }
+  @keyframes floatUp { from { transform: translateY(0) scale(.6); opacity: 1 } to { transform: translateY(-380px) scale(1.2); opacity: 0 } }
+
+  #toast { position: absolute; left: 40px; top: 1460px; font-size: 30px; font-weight: 900; background: #0009;
+    padding: 10px 24px; border-radius: 30px; opacity: 0; transition: opacity .3s; }
+  #toast.on { opacity: 1; }
+
+  #status { position: absolute; left: 10px; bottom: 6px; font-size: 18px; opacity: .5; }
+  .flashscreen { position: absolute; inset: 0; background: #fff; animation: fs .6s ease-out forwards; pointer-events: none; }
+  @keyframes fs { from { opacity: .8 } to { opacity: 0 } }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="placeholder stars"></div>
+  <div class="placeholder ground"></div>
+  <video id="idleVid" muted loop playsinline autoplay></video>
+  <video id="actionVid" playsinline></video>
+  <div id="cast" class="placeholder"></div>
+
+  <div id="goal"><div id="goalFill"></div><div id="goalText"></div></div>
+  <div id="menu"></div>
+  <div id="topFan"><div class="t">👑 TOP FAN</div><img id="fanPic" alt=""><div class="n" id="fanName">be the first!</div><div class="c" id="fanCoins"></div></div>
+  <div id="likes"><div class="lbl" id="likeLbl"></div><div id="likeBar"><div id="likeFill"></div></div><div class="cnt" id="likeCnt"></div></div>
+  <div id="callout"><img id="calloutPic" alt=""><div><div class="who" id="calloutWho"></div><div class="what" id="calloutWhat"></div></div></div>
+  <div id="queue"></div>
+  <div id="hint"></div>
+  <div id="toast"></div>
+  <div id="status"></div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const stage = $('stage');
+const fit = () => {
+  const s = Math.min(innerWidth / 1080, innerHeight / 1920);
+  stage.style.transform = `translate(-50%, -50%) scale(${s})`;
+};
+addEventListener('resize', fit); fit();
+
+let cfg, existing = new Set();
+const store = {
+  get(k, d) { try { return JSON.parse(localStorage.getItem('ov_' + k)) ?? d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('ov_' + k, JSON.stringify(v)); } catch {} },
+};
+let state = store.get('state', { goal: 0, likes: 0, fans: {} });
+const save = () => store.set('state', state);
+
+async function exists(url) {
+  try { const r = await fetch(url, { method: 'HEAD' }); return r.ok; } catch { return false; }
+}
+
+async function init() {
+  cfg = await (await fetch('/config')).json();
+  const urls = [cfg.idleVideo, ...cfg.gifts.flatMap((g) => g.clips || []), ...(cfg.likeMeter?.clips || []), ...(cfg.defaultGift?.clips || [])].filter(Boolean);
+  await Promise.all(urls.map(async (u) => (await exists(u)) && existing.add(u)));
+
+  if (existing.has(cfg.idleVideo)) { stage.classList.add('has-video'); $('idleVid').src = cfg.idleVideo; }
+
+  $('cast').innerHTML = cfg.characters.map((c, i) =>
+    `<div class="pup" id="pup${i}"><div class="hat">👑</div><div class="body">${c.emoji}</div><div class="tag">${c.name}</div></div>`).join('');
+  $('menu').innerHTML = cfg.gifts.map((g, i) =>
+    `<div class="item ${g.epic ? 'epic' : ''}" id="item${i}"><span class="ico">${g.icon}</span>${g.label}</div>`).join('');
+  $('likeLbl').textContent = cfg.likeMeter?.label || '';
+  $('hint').textContent = cfg.chatHint || '';
+  render();
+  connect();
+}
+
+function render() {
+  const g = cfg.goal;
+  const pct = Math.min(100, (state.goal / g.target) * 100);
+  $('goalFill').style.width = pct + '%';
+  $('goalText').textContent = `${g.label}  ${Math.min(state.goal, g.target)}/${g.target} 🪙`;
+  const lm = cfg.likeMeter;
+  $('likeFill').style.width = Math.min(100, (state.likes / lm.target) * 100) + '%';
+  $('likeCnt').textContent = `${state.likes}/${lm.target} ❤️`;
+  const top = Object.values(state.fans).sort((a, b) => b.coins - a.coins)[0];
+  if (top) {
+    $('fanName').textContent = top.name;
+    $('fanCoins').textContent = `${top.coins} coins`;
+    $('fanPic').src = top.pic || ''; $('fanPic').style.display = top.pic ? '' : 'none';
+  } else { $('fanPic').style.display = 'none'; }
+}
+
+// ---------- reaction queue ----------
+const queue = [];
+let busy = false;
+function enqueue(job) { queue.push(job); updateQueue(); if (!busy) next(); }
+function updateQueue() {
+  $('queue').style.display = queue.length ? 'block' : 'none';
+  $('queue').textContent = `⏳ ${queue.length} more coming up`;
+}
+async function next() {
+  const job = queue.shift(); updateQueue();
+  if (!job) { busy = false; return; }
+  busy = true;
+  await play(job);
+  next();
+}
+
+function showCallout(job) {
+  const c = $('callout');
+  $('calloutWho').textContent = job.who;
+  $('calloutWhat').textContent = job.what;
+  $('calloutPic').src = job.pic || ''; $('calloutPic').style.display = job.pic ? '' : 'none';
+  c.classList.toggle('epic', !!job.epic);
+  c.classList.add('on');
+}
+
+function play(job) {
+  return new Promise((resolve) => {
+    showCallout(job);
+    if (job.epic) { const f = document.createElement('div'); f.className = 'flashscreen'; stage.appendChild(f); setTimeout(() => f.remove(), 700); }
+    if (job.menuIndex != null) {
+      const it = $('item' + job.menuIndex);
+      it.classList.remove('flash'); void it.offsetWidth; it.classList.add('flash');
+    }
+    const done = () => { $('callout').classList.remove('on'); setTimeout(resolve, 250); };
+
+    const clips = (job.clips || []).filter((u) => existing.has(u));
+    if (clips.length) {
+      const v = $('actionVid');
+      v.src = clips[Math.floor(Math.random() * clips.length)];
+      v.currentTime = 0;
+      v.onended = () => { v.classList.remove('on'); done(); };
+      v.onerror = () => { v.classList.remove('on'); done(); };
+      v.play().then(() => v.classList.add('on')).catch(() => { v.muted = true; v.play().then(() => v.classList.add('on')).catch(done); });
+      return;
+    }
+    // No clip yet: animate the placeholder characters instead.
+    const pups = job.character === 'all' ? cfg.characters.map((_, i) => $('pup' + i)) : [$('pup' + job.character)];
+    pups.forEach((p) => p && p.classList.add(job.anim || 'dance'));
+    setTimeout(() => { pups.forEach((p) => p && p.classList.remove('dance', 'spin', 'jump', 'rocket')); done(); },
+      job.anim === 'rocket' ? 4200 : 3500);
+  });
+}
+
+function floatAt(i, emoji, label) {
+  const el = document.createElement('div');
+  el.className = 'float';
+  const n = cfg.characters.length;
+  const x = i === 'all' || i == null ? 120 + Math.random() * 840 : (1080 / n) * (i + 0.5) - 35;
+  el.style.left = x + 'px'; el.style.top = '1000px';
+  el.innerHTML = emoji + (label ? `<small>${label}</small>` : '');
+  stage.appendChild(el);
+  setTimeout(() => el.remove(), 1900);
+}
+
+let toastTimer;
+function toast(text) {
+  $('toast').textContent = text; $('toast').classList.add('on');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.remove('on'), 3000);
+}
+
+// ---------- events ----------
+function handle(ev) {
+  if (ev.type === 'status') { $('status').textContent = ev.text; return; }
+  if (ev.type === 'reset') { state = { goal: 0, likes: 0, fans: {} }; save(); render(); return; }
+
+  if (ev.type === 'gift') {
+    const idx = cfg.gifts.findIndex((g) => g.gift.toLowerCase() === String(ev.gift).toLowerCase());
+    const g = idx >= 0 ? cfg.gifts[idx] : cfg.defaultGift;
+    const total = (ev.coins || 1) * (ev.count || 1);
+
+    // Top fan tracking
+    const key = ev.user.id || ev.user.name;
+    const prevTop = Object.values(state.fans).sort((a, b) => b.coins - a.coins)[0];
+    const f = state.fans[key] || { name: ev.user.name, pic: ev.user.pic, coins: 0 };
+    f.coins += total; f.name = ev.user.name; f.pic = ev.user.pic || f.pic;
+    state.fans[key] = f;
+    const newTop = Object.values(state.fans).sort((a, b) => b.coins - a.coins)[0];
+    if (prevTop && newTop.name !== prevTop.name) {
+      $('topFan').classList.remove('steal'); void $('topFan').offsetWidth; $('topFan').classList.add('steal');
+      toast(`👑 ${newTop.name} stole the crown!`);
+    }
+
+    // Goal
+    const before = state.goal;
+    state.goal += total;
+    save(); render();
+
+    enqueue({
+      who: ev.user.name,
+      what: `sent ${idx >= 0 ? g.icon : '🎁'} ${ev.gift}${ev.count > 1 ? ' ×' + ev.count : ''} → ${g.label}`,
+      pic: ev.user.pic, clips: g.clips, character: g.character, anim: g.anim, epic: g.epic, menuIndex: idx >= 0 ? idx : null,
+    });
+
+    if (before < cfg.goal.target && state.goal >= cfg.goal.target) {
+      const epic = cfg.gifts.find((x) => x.epic) || g;
+      enqueue({ who: '🎉 GOAL REACHED!', what: cfg.goal.label, clips: epic.clips, character: 'all', anim: epic.anim || 'rocket', epic: true });
+    }
+  }
+
+  if (ev.type === 'like') {
+    const lm = cfg.likeMeter;
+    state.likes += ev.count || 1;
+    if (Math.random() < 0.5) floatAt('all', '❤️');
+    if (state.likes >= lm.target) {
+      state.likes = 0;
+      enqueue({ who: '❤️ LIKE METER FULL!', what: lm.label, clips: lm.clips, character: lm.character, anim: lm.anim });
+    }
+    save(); render();
+  }
+
+  if (ev.type === 'chat') {
+    const t = String(ev.text).trim();
+    const ci = cfg.chatCommands?.[t];
+    if (ci != null) floatAt(ci, '💬', `${ev.user.name}: woof!`);
+  }
+
+  if (ev.type === 'follow') toast(`➕ ${ev.user.name} followed! Welcome to the crew`);
+  if (ev.type === 'share') toast(`🔁 ${ev.user.name} shared the LIVE!`);
+}
+
+function connect() {
+  const ws = new WebSocket(`ws://${location.host}`);
+  ws.onmessage = (m) => handle(JSON.parse(m.data));
+  ws.onclose = () => { $('status').textContent = 'reconnecting to overlay server...'; setTimeout(connect, 2000); };
+}
+
+init();
+</script>
+</body>
+</html>

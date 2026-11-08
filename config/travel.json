@@ -1,0 +1,42 @@
+{
+  "brand": "Lumo • Unheard Places",
+  "mascot": "Lumo",
+  "volume": 0.8,
+  "staySeconds": 150,
+  "lumo": { "src": "lumo/idle.webm" },
+  "home": {
+    "name": "The Lantern Room",
+    "sky": ["#3a2440", "#0d0812"], "glow": ["#ffb867", "#ff7a59", "#7a4cff"],
+    "particles": "dust", "sound": ["home"], "bg": "places/home.mp4", "lumoInVideo": false
+  },
+  "places": [
+    { "id": "whale", "name": "Inside a Sleeping Whale", "icon": "🐋",
+      "sky": ["#0b3a52", "#020a12"], "glow": ["#3fd0ff", "#1f6bff", "#7cf5d6"],
+      "particles": "bubbles", "sound": ["whale"], "bg": "places/whale.mp4", "lumoInVideo": false },
+    { "id": "cloud", "name": "Rain Inside a Cloud", "icon": "☁️",
+      "sky": ["#5a6580", "#141a26"], "glow": ["#c9d7ff", "#8aa2ff", "#ffffff"],
+      "particles": "rain", "sound": ["rain", "wind"], "bg": "places/cloud.mp4", "lumoInVideo": false },
+    { "id": "crystal", "name": "Crystal Cave on the Moon", "icon": "💎",
+      "sky": ["#2a1856", "#05030f"], "glow": ["#b48cff", "#5ee7ff", "#ff8ce6"],
+      "particles": "sparkles", "sound": ["crystal"], "bg": "places/crystal.mp4", "lumoInVideo": false },
+    { "id": "island", "name": "Campfire in the Sky", "icon": "🔥",
+      "sky": ["#3a160c", "#0a0404"], "glow": ["#ff8a3d", "#ffcf6b", "#ff4d4d"],
+      "particles": "embers", "sound": ["fire", "crickets", "wind"], "bg": "places/island.mp4", "lumoInVideo": false }
+  ],
+  "gifts": [
+    { "gift": "Rose", "icon": "🌹", "coins": 1, "label": "Chime", "action": "oneshot", "sound": "chime" },
+    { "gift": "Ice Cream Cone", "icon": "🍦", "coins": 1, "label": "Bubbles", "action": "oneshot", "sound": "bubbles" },
+    { "gift": "Finger Heart", "icon": "🫰", "coins": 5, "label": "Rain", "action": "layer", "sound": "rain", "seconds": 60 },
+    { "gift": "Perfume", "icon": "🧴", "coins": 20, "label": "Thunder", "action": "layer", "sound": "thunder", "seconds": 60 },
+    { "gift": "Doughnut", "icon": "🍩", "coins": 30, "label": "Rain Inside a Cloud", "action": "travel", "place": "cloud" },
+    { "gift": "Hand Hearts", "icon": "🤲", "coins": 100, "label": "Inside a Sleeping Whale", "action": "travel", "place": "whale" },
+    { "gift": "Confetti", "icon": "🎊", "coins": 100, "label": "Crystal Cave on the Moon", "action": "travel", "place": "crystal" },
+    { "gift": "Money Gun", "icon": "💸", "coins": 500, "label": "Campfire in the Sky", "action": "travel", "place": "island" },
+    { "gift": "Galaxy", "icon": "🌌", "coins": 1000, "label": "Somewhere unknown", "action": "travel", "place": "random", "epic": true }
+  ],
+  "defaultGift": { "label": "Chime", "action": "oneshot", "sound": "chime" },
+  "goal": { "label": "Grand Tour", "sub": "Lumo visits every place", "target": 1000 },
+  "likeMeter": { "label": "Likes until Lumo waves", "target": 500 },
+  "chatCommands": { "hi": "wave", "hello": "wave", "lumo": "wave", "❤️": "heart" },
+  "chatHint": "Type “hi” and Lumo waves back"
+}
